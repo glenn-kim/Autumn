@@ -6,11 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Created by infinitu on 14. 10. 31..
+ * Created by infinitu on 14. 11. 18..
  */
-
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface PUT {
-    public String value();
-}
+@Target(ElementType.TYPE)
+public @interface Controller {}

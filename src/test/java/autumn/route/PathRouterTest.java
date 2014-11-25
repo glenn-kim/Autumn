@@ -101,10 +101,8 @@ public class PathRouterTest {
 
         try{
             Assert.assertTrue(
-                    Result.class.isInstance(
-                            root.doAct(new Request(PathRouter.REST_METHOD_ID_POST,
-                                    String.format("/%s/%s/aaa",testParam1,testParam2)))
-                    )
+                    returns == root.doAct(new Request(PathRouter.REST_METHOD_ID_POST,
+                                String.format("/%s/%s/aaa",testParam1,testParam2)))
             );
         }
         catch(Exception e){
@@ -134,17 +132,17 @@ public class PathRouterTest {
         return new Result() {};
     }
 
-    @SuppressWarnings("FieldCanBeLocal")
     private static String testParam1 = "param1";
 
-    @SuppressWarnings("FieldCanBeLocal")
     private static String testParam2 = "param2";
+
+    private static Result returns = new Result() {};
 
     @SuppressWarnings("UnusedDeclaration")
     public static Result dummyMethod_with_param(@INP("a") String a, @INP("b") String b){
         Assert.assertEquals(a,testParam1);
         Assert.assertEquals(b,testParam2);
-        return new Result() {};
+        return returns;
     }
 
 }

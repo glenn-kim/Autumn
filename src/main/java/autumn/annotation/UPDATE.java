@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  */
 
 @Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.TYPE)
+@Target(ElementType.METHOD)
 public @interface UPDATE {
-    public String path();
+    public String value();
 }

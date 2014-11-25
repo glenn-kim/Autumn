@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
+import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -15,31 +16,35 @@ import java.util.*;
  */
 public class PathRouter {
 
-    static final int REST_METHOD_ID_GET = 0;
-    static final int REST_METHOD_ID_POST = 1;
-    static final int REST_METHOD_ID_PUT = 2;
-    static final int REST_METHOD_ID_DELETE = 3;
-    static final int REST_METHOD_ID_UPDATE = 4;
-    static final int REST_METHOD_ID_OPTION = 5;
-    static final int REST_METHOD_ID_INFO = 6;
-    static final int REST_METHOD_ID_HEAD = 7;
-    static final int REST_METHOD_ID_CUSTUM = -1; //todo 커스텀 메서드 대응.
+    public static final int REST_METHOD_ID_GET = 0;
+    public static final int REST_METHOD_ID_POST = 1;
+    public static final int REST_METHOD_ID_PUT = 2;
+    public static final int REST_METHOD_ID_DELETE = 3;
+    public static final int REST_METHOD_ID_UPDATE = 4;
+    public static final int REST_METHOD_ID_OPTION = 5;
+    public static final int REST_METHOD_ID_INFO = 6;
+    public static final int REST_METHOD_ID_HEAD = 7;
+    public static final int REST_METHOD_ID_CUSTUM = -1; //todo 커스텀 메서드 대응.
 
     private static final String WILD_CARD_REGEX_1 = "^\\{[^}]+\\}$";
     private static final String WILD_CARD_REGEX_2 = "^:[^:]+$";
 
-    PathNode root = new PathNode(null);
+    public static PathAllocator createNewRouter(){
+        return new PathNode(null);
+    }
 
-
-    public interface PathAllocator{
+    protected interface PathAllocator extends ActionInvoker{
         public PathAllocator path(String Path);
 
         public PathAllocator addAction(String actionPath, Method method, int RESTMethod)
                 throws MalformedObjectNameException;
+    }
 
+    public interface ActionInvoker{
         public Result doAct(Request req) throws InvocationTargetException, IllegalAccessException;
     }
-    static class PathNode implements PathAllocator{
+
+    protected static class PathNode implements PathAllocator{
         String nodeName;
         Map<String,PathNode> childNodes;
         PathNode childWildNode;
@@ -48,13 +53,13 @@ public class PathRouter {
         //temporary status.
         List<String> whildcardNamespaceStatus = null;
 
-        protected PathNode(String node){
+        PathNode(String node){
             this.nodeName = node;
             this.childNodes = new HashMap<>();
             this.childWildNode = null;
         }
 
-        protected PathNode(){
+        PathNode(){
             this.nodeName = null;
             this.childNodes = new HashMap<>();
             this.childWildNode = null;
@@ -162,77 +167,78 @@ public class PathRouter {
             return ret;
         }
 
-        protected static class ActionWrap {
-            Method method;
-            int[] paramIdxMap;
+    }
 
-            private ActionWrap(Method method, List<String> whildcardNamespace)
-                    throws MalformedObjectNameException {
+    protected static class ActionWrap {
+        Method method;
+        int[] paramIdxMap;
 
-                this.method = method;
-                Parameter[] actionParam = method.getParameters();
+        private ActionWrap(Method method, List<String> whildcardNamespace)
+                throws MalformedObjectNameException {
 
-                if(!Modifier.isStatic(method.getModifiers()))
-                    throw new MalformedParametersException("method should be static.");
+            this.method = method;
+            Parameter[] actionParam = method.getParameters();
 
-                if(!Result.class.isAssignableFrom(method.getReturnType()))
-                    throw new MalformedParametersException("method should returns Result Type.");
+            if(!Modifier.isStatic(method.getModifiers()))
+                throw new MalformedParametersException("method should be static.");
 
-                if(whildcardNamespace!=null){
-                    if(actionParam.length > whildcardNamespace.size()+1)
-                        throw new MalformedParametersException("wrong whild card parameters.");
+            if(!Result.class.isAssignableFrom(method.getReturnType()))
+                throw new MalformedParametersException("method should returns Result Type.");
+
+            if(whildcardNamespace!=null){
+                if(actionParam.length > whildcardNamespace.size()+1)
+                    throw new MalformedParametersException("wrong whild card parameters.");
+            }
+            else{
+                if(actionParam.length > 1)
+                    throw new MalformedParametersException("wrong whild card parameters." +
+                            " it request "+actionParam.length+" parameter");
+            }
+
+            paramIdxMap = new int[actionParam.length];
+            for(int i = 0 ; i < actionParam.length ; i++){
+                if(Request.class.equals(actionParam[i].getType())){
+                    paramIdxMap[i] = -1;
                 }
-                else{
-                    if(actionParam.length > 1)
-                        throw new MalformedParametersException("wrong whild card parameters." +
-                                " it request "+actionParam.length+" parameter");
-                }
+                else if(String.class.isAssignableFrom(actionParam[i].getType())){
 
-                paramIdxMap = new int[actionParam.length];
-                for(int i = 0 ; i < actionParam.length ; i++){
-                    if(Request.class.equals(actionParam[i].getType())){
-                        paramIdxMap[i] = -1;
-                    }
-                    else if(String.class.isAssignableFrom(actionParam[i].getType())){
-
-                        String urlPatternParamName = null;
-                        Annotation[] annotations = actionParam[i].getAnnotations();
-                        for(Annotation anno : annotations){
-                            if(INP.class.isAssignableFrom(anno.annotationType())){
-                                urlPatternParamName = INP.class.cast(anno).value();
-                                break;
-                            }
+                    String urlPatternParamName = null;
+                    Annotation[] annotations = actionParam[i].getAnnotations();
+                    for(Annotation anno : annotations){
+                        if(INP.class.isAssignableFrom(anno.annotationType())){
+                            urlPatternParamName = INP.class.cast(anno).value();
+                            break;
                         }
-
-                        if(urlPatternParamName == null)
-                            throw new MalformedParametersException("Parameter should be annotated by @INP");
-
-                        int paramIdx = whildcardNamespace != null ?
-                                            whildcardNamespace.indexOf(urlPatternParamName) :
-                                            -1;
-
-                        if(paramIdx < 0)
-                            throw new MalformedObjectNameException("can not find parameter '"+
-                                    actionParam[i].getName()+"' in url pattern");
-                        paramIdxMap[i]=paramIdx;
                     }
-                    else
-                        throw new MalformedParametersException("Parameter Router only support type of String.");
+
+                    if(urlPatternParamName == null)
+                        throw new MalformedParametersException("Parameter should be annotated by @INP");
+
+                    int paramIdx = whildcardNamespace != null ?
+                                        whildcardNamespace.indexOf(urlPatternParamName) :
+                                        -1;
+
+                    if(paramIdx < 0)
+                        throw new MalformedObjectNameException("can not find parameter '"+
+                                actionParam[i].getName()+"' in url pattern");
+                    paramIdxMap[i]=paramIdx;
+                }
+                else
+                    throw new MalformedParametersException("Parameter Router only support type of String.");
+            }
+        }
+
+        protected Result invoke(Request req, List<String> param)
+                throws InvocationTargetException, IllegalAccessException {
+            Object[] input = new Object[paramIdxMap.length];
+            for(int i = 0 ; i < input.length ; i++){
+                if(paramIdxMap[i]<0)
+                    input[i]=req;
+                else{
+                    input[i] = param.get(paramIdxMap[i]);
                 }
             }
-
-            protected Result invoke(Request req, List<String> param)
-                    throws InvocationTargetException, IllegalAccessException {
-                Object[] input = new Object[paramIdxMap.length];
-                for(int i = 0 ; i < input.length ; i++){
-                    if(paramIdxMap[i]<0)
-                        input[i]=req;
-                    else{
-                        input[i] = param.get(paramIdxMap[i]);
-                    }
-                }
-                return (Result)method.invoke(null,input);
-            }
+            return (Result)method.invoke(null,input);
         }
     }
 }

@@ -16,14 +16,19 @@ public class Request {
         switch (req.getMethod()){
             case "GET":
                 this.method= PathRouter.REST_METHOD_ID_GET;
+                break;
             case "POST":
                 this.method= PathRouter.REST_METHOD_ID_POST;
+                break;
             case "PUT":
                 this.method= PathRouter.REST_METHOD_ID_PUT;
+                break;
             case "DELETE":
                 this.method= PathRouter.REST_METHOD_ID_DELETE;
+                break;
             case "UPDATE":
                 this.method= PathRouter.REST_METHOD_ID_UPDATE;
+                break;
         }
         this.path = req.getContextPath()+req.getPathInfo();
     }

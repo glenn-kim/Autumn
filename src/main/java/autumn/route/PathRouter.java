@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
-import java.nio.file.Path;
 import java.util.*;
 
 /**
@@ -145,7 +144,7 @@ public class PathRouter {
                 throws InvocationTargetException, IllegalAccessException {
 
             if(!path.hasNext()){
-                ActionWrap action = actions[req.method];
+                ActionWrap action = actions[req.getMethod()];
                 if(action == null)
                     return null;
                 return action.invoke(req,param);

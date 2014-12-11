@@ -7,6 +7,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.management.MalformedObjectNameException;
+import java.io.OutputStream;
 import java.lang.reflect.Method;
 
 import static autumn.route.PathRouter.PathNode;
@@ -129,14 +130,23 @@ public class PathRouterTest {
 
     @SuppressWarnings("UnusedDeclaration")
     public static Result dummyMethod_no_param(){
-        return new Result() {};
+        return new Result(200) {
+            @Override
+            protected void writeBody(OutputStream stream) {
+
+            }
+        };
     }
 
     private static String testParam1 = "param1";
 
     private static String testParam2 = "param2";
 
-    private static Result returns = new Result() {};
+    private static Result returns = new Result(200) {
+        @Override
+        protected void writeBody(OutputStream stream) {
+        }
+    };
 
     @SuppressWarnings("UnusedDeclaration")
     public static Result dummyMethod_with_param(@INP("a") String a, @INP("b") String b){

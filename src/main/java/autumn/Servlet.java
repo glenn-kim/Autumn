@@ -1,31 +1,35 @@
 package autumn;
 
-import autumn.annotation.*;
+import autumn.header.Cookie;
+import autumn.header.session.DefaultSessionStorage;
+import autumn.header.session.Session;
+import autumn.header.session.SessionKeyIssuer;
+import autumn.header.session.SessionStorage;
+import autumn.result.ResultResolver;
 import autumn.route.ControllerReflector;
 import autumn.route.PathRouter;
-import org.reflections.Reflections;
 
 import javax.management.MalformedObjectNameException;
 import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
+import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
-
-import autumn.route.PathRouter.*;
 
 /**
  * Created by infinitu on 14. 10. 31..
  */
 public class Servlet extends HttpServlet{
 
+    public static final String DEFAULT_SESSION_KEY_COOKIE_NAME = "AUTUMN_SESSION";
+
     PathRouter.ActionInvoker invoker;
+    SessionStorage sessionStorage;
 
     @Override
     public void init() throws ServletException {
@@ -37,6 +41,17 @@ public class Servlet extends HttpServlet{
             e.printStackTrace();
             System.exit(-1);
         }
+
+        SessionKeyIssuer issuer = null;
+        try {
+            issuer = new SessionKeyIssuer(DEFAULT_SESSION_KEY_COOKIE_NAME);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            System.exit(-1);
+        }
+
+        sessionStorage = new DefaultSessionStorage(issuer,DEFAULT_SESSION_KEY_COOKIE_NAME);
+        Result.initializeTemplateEngine();
     }
 //
 //    @Override
@@ -45,28 +60,47 @@ public class Servlet extends HttpServlet{
 //    }
 
     @Override
-    protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-        PrintWriter out = resp.getWriter();
-
+    protected void service(HttpServletRequest servletReq, HttpServletResponse servletResp) throws ServletException, IOException {
         Result res = null;
-        Request reqest = new Request(req);
-
-        out.println(reqest.getPath());
+        Request request = new Request(servletReq,sessionStorage.getSession(extractSessionId(servletReq)));
 
         try {
-            res = invoker.doAct(reqest);
+            res = invoker.doAct(request);
         } catch (InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace(out);
+            e.printStackTrace(System.err);
+            //TODO 500 error
+            return;
         }
-        resp.setContentType("text/plain");
-        out.println("result is ::");
-        if (res != null) {
-            out.print(res.toString());
+
+        if(res == null){
+            //TODO 404 error
+            return;
         }
-        else
-        {
-            out.print("null");
+
+        servletResp.setContentType(res.getContentType());
+        servletResp.setStatus(res.getStatusCode());
+        @SuppressWarnings("unchecked")
+        Set<Map.Entry<String, String>> newCookies = res.mergeCookies(sessionStorage, request).entrySet();
+
+        for(Map.Entry<String,String> cookie : newCookies){
+            servletResp.addCookie(
+                    new javax.servlet.http.Cookie(
+                            cookie.getKey(),
+                            cookie.getValue()));
         }
-        out.flush();
+
+        res.writeBodyServlet(servletReq,servletResp,this.getServletContext(), servletResp.getOutputStream());
+    }
+
+    private String extractSessionId(HttpServletRequest req){
+        javax.servlet.http.Cookie[] cookies = req.getCookies();
+        if(cookies == null)
+            return null;
+        for(javax.servlet.http.Cookie cookie : cookies){
+            if(cookie.getName().equals(DEFAULT_SESSION_KEY_COOKIE_NAME)){
+                return cookie.getValue();
+            }
+        }
+        return null;
     }
 }

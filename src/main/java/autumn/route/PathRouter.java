@@ -94,7 +94,7 @@ public class PathRouter {
             String[] actionPathArr = path.split("/");
             LinkedList<String> pathList = new LinkedList<>();
             Collections.addAll(pathList,actionPathArr);
-            if(pathList.getFirst().equals("")) pathList.removeFirst();
+            if(pathList.size()>0 && pathList.getFirst().equals("")) pathList.removeFirst();
             return pathList.listIterator();
         }
 

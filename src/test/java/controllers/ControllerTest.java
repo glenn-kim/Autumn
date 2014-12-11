@@ -12,6 +12,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import javax.management.MalformedObjectNameException;
+import java.io.OutputStream;
 import java.lang.reflect.InvocationTargetException;
 
 /**
@@ -46,7 +47,12 @@ public class ControllerTest {
 
     private static String param1 = "param1";
     private static String param2 = "param2";
-    private static Result returns = new Result() {};
+    private static Result returns = new Result(200) {
+        @Override
+        protected void writeBody(OutputStream stream) {
+
+        }
+    };
     @GET("/{a}/{b}")
     public static Result testCode(@INP("a") String a, @INP("b") String b){
         Assert.assertEquals(a,param1);

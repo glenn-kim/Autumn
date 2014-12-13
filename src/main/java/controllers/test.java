@@ -18,7 +18,9 @@ public class test {
     public static Result echo(@INP("aaa")String param,
                               @INP("bbb")String param2,
                               Request request){
+
         String cntStr = (String) request.getSession("cnt");
+
         if(cntStr==null) cntStr="0";
         int cnt = Integer.parseInt(cntStr);
 
@@ -26,7 +28,8 @@ public class test {
 
         return Result.Ok.plainText(param +"  "+ cnt + "th call")
                 .with(new Cookie("testCookie", "testHOHOHO"))
-                .with(new SessionData<>("cnt", cnt + ""));
+                .with(new SessionData<>("cnt", cnt + "")).
+                        .
 
     }
 

@@ -79,7 +79,7 @@ public abstract class Result<This extends Result>{
         return withNewCookie(new Cookie(key,value));
     }
 
-    public This withNewCookie(Cookie... cookie){
+    public This withNewCookie(Cookie cookie){
         this.newCookies = true;
         Collections.addAll(cookieInput,cookie);
         return (This)this;

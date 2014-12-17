@@ -5,11 +5,12 @@ import java.lang.reflect.MalformedParametersException;
 import java.lang.reflect.ParameterizedType;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 /**
  * Created by infinitu on 14. 12. 12..
  */
-public class AbstractTable<DataType> {
+public abstract class AbstractTable<DataType> {
 
     protected Class<DataType> dataTypeClass;
     protected Set<Field> columns;
@@ -49,4 +50,21 @@ public class AbstractTable<DataType> {
             columnMapping.add(dataField);
         }
     }
+
+    protected abstract String toSQL();
+
+
+//    public <R> JoinTable<AbstractTable<DataType>, AbstractTable<R>, DefaultJoinData>
+//        join(AbstractTable<R> rightTable,
+//             BiFunction<AbstractTable<DataType>, AbstractTable<R>, Condition> conditionFunc) throws NoSuchFieldException {
+//
+//
+//        return new JoinTable<AbstractTable<DataType>, AbstractTable<R>, DefaultJoinData>(this,rightTable,DefaultJoinData.class) {
+//
+//            @Override
+//            public Condition on(AbstractTable<DataType> left, AbstractTable<R> right) {
+//                return conditionFunc.apply(left,right);
+//            }
+//        };
+//    }
 }

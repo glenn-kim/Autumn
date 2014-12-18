@@ -1,10 +1,14 @@
 package autumn;
 
+import autumn.database.jdbc.DBConnection;
+import autumn.database.jdbc.JDBCConnectionPool;
+import autumn.database.jdbc.JDBCDConnection;
 import autumn.header.Cookie;
 import autumn.header.session.Session;
 import autumn.route.PathRouter;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,20 +22,23 @@ public class Request {
     private String path;
     private Map<String,String> cookieMap;
     private Session session;
+    private JDBCConnectionPool pool;
+    private JDBCDConnection conn;
 
-    public Request(HttpServletRequest req, Session session){
-        this(parseMethod(req), parsePath(req),parseCookies(req),session);
+    public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool){
+        this(parseMethod(req), parsePath(req),parseCookies(req),session, connectionPool);
     }
 
     public Request(int method, String path) {
-        this(method,path,null,null);
+        this(method,path,null,null,null);
     }
 
-    public Request(int method, String path, Map<String,String> cookieMap, Session session){
+    public Request(int method, String path, Map<String,String> cookieMap, Session session, JDBCConnectionPool connectionPool){
         this.method = method;
         this.path = path;
         this.cookieMap = cookieMap;
         this.session = session;
+        this.pool = connectionPool;
     }
 
     public String getPath() {
@@ -56,6 +63,21 @@ public class Request {
 
     public Map<String,String> getAllCookies() {
         return cookieMap;
+    }
+
+    public DBConnection getDBConnection(){
+        if(conn == null)
+            conn = new JDBCDConnection(pool);
+        return conn;
+    }
+    protected void freeDBConn(){
+        if(conn!=null){
+            try {
+                conn.free(pool);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     static private int parseMethod(HttpServletRequest req){

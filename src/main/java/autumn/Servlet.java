@@ -1,5 +1,7 @@
 package autumn;
 
+import autumn.database.jdbc.ConnectionPool;
+import autumn.database.jdbc.JDBCConnectionPool;
 import autumn.header.Cookie;
 import autumn.header.session.DefaultSessionStorage;
 import autumn.header.session.Session;
@@ -30,6 +32,7 @@ public class Servlet extends HttpServlet{
 
     PathRouter.ActionInvoker invoker;
     SessionStorage sessionStorage;
+    JDBCConnectionPool connectionPool;
 
     @Override
     public void init() throws ServletException {
@@ -52,6 +55,8 @@ public class Servlet extends HttpServlet{
 
         sessionStorage = new DefaultSessionStorage(issuer,DEFAULT_SESSION_KEY_COOKIE_NAME);
         Result.initializeTemplateEngine();
+
+        connectionPool = JDBCConnectionPool.Instance();
     }
 //
 //    @Override
@@ -62,7 +67,7 @@ public class Servlet extends HttpServlet{
     @Override
     protected void service(HttpServletRequest servletReq, HttpServletResponse servletResp) throws ServletException, IOException {
         Result res = null;
-        Request request = new Request(servletReq,sessionStorage.getSession(extractSessionId(servletReq)));
+        Request request = new Request(servletReq,sessionStorage.getSession(extractSessionId(servletReq)),connectionPool);
 
         try {
             res = invoker.doAct(request);
@@ -71,6 +76,8 @@ public class Servlet extends HttpServlet{
             //TODO 500 error
             return;
         }
+
+        request.freeDBConn();
 
         if(res == null){
             //TODO 404 error
@@ -90,6 +97,8 @@ public class Servlet extends HttpServlet{
         }
 
         res.writeBodyServlet(servletReq,servletResp,this.getServletContext(), servletResp.getOutputStream());
+
+
     }
 
     private String extractSessionId(HttpServletRequest req){

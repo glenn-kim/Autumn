@@ -1,10 +1,15 @@
 package autumn.database;
 
+import autumn.Result;
 import autumn.annotation.Model;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 
@@ -13,13 +18,28 @@ import static org.junit.Assert.*;
  */
 public class SQLTest {
 
-    private AbstractQuery<UserTable> userQuery = new TableQuery<>(UserTable.class);
-    private AbstractQuery<UserJobJoin> joinQuery = new JoinQuery<>(UserJobJoin.class);
+    private AbstractQuery<UserTable> userQuery;
+    private AbstractQuery<UserJobJoin> joinQuery;
     private UserTable userTable;
+
+    User u1 = new User();
+    User u2 = new User();
 
     @Before
     public void setUp() throws Exception {
         userTable = new UserTable();
+
+        u1.name="u1Name";
+        u2.name="u2Name";
+
+        u1.uid = 1;
+        u2.uid = 2;
+
+        u1.time = new Timestamp(System.currentTimeMillis());
+        u2.time = new Timestamp(System.currentTimeMillis()-36000);
+
+        userQuery = new TableQuery<>(UserTable.class);
+        joinQuery = new JoinQuery<>(UserJobJoin.class);
     }
 
     @Test
@@ -53,18 +73,6 @@ public class SQLTest {
 
     @Test
     public void testTableQuery(){
-
-        User u1 = new User();
-        User u2 = new User();
-
-        u1.name="u1Name";
-        u2.name="u2Name";
-
-        u1.uid = 1;
-        u2.uid = 2;
-
-        u1.time = new Timestamp(System.currentTimeMillis());
-        u2.time = new Timestamp(System.currentTimeMillis()-36000);
 
         assertEquals(
                 String.format("INSERT INTO users(uid, name, date) " +
@@ -132,13 +140,29 @@ public class SQLTest {
 
         //TODO UPDATE
     }
+
+
+    @Test(timeout = 10000)
+    public void testTableDataMap() throws SQLException {
+
+        List<Object[]> list = new ArrayList<>();
+        list.add(new Object[]{null,u1.uid,u1.name,u1.time});
+        list.add(new Object[]{null,u2.uid,u2.name,u2.time});
+
+        MockResultSet rs = new MockResultSet(list);
+
+        assertArrayEquals(
+                new User[]{u1,u2},
+                userQuery.processQueryResult(rs).toArray()
+        );
+    }
 }
 
 @Model("users")
 class UserTable extends Table<User>{
-    Column<Integer> uid = intColumn("uid");
-    Column<String> name = stringColumn("name");
-    Column<Timestamp> time = timestampColumn("date");
+    public Column<Integer> uid = intColumn("uid");
+    public Column<String> name = stringColumn("name");
+    public Column<Timestamp> time = timestampColumn("date");
 
     public UserTable() throws NoSuchFieldException {
         super(User.class);
@@ -149,18 +173,32 @@ class User{
     public int uid;
     public String name;
     public Timestamp time;
+
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            User u = (User) obj;
+            return
+                u.uid == uid &&
+                u.name.equals(name) &&
+                u.time.equals(time);
+        } catch (Exception e){
+            return false;
+        }
+    }
 }
 
 @Model("jobs")
 class JobTable extends Table<Job>{
 
+
     public JobTable() throws NoSuchFieldException {
         super(Job.class);
     }
 
-    Column<Integer> uid = intColumn("user");
-    Column<String> jobName = stringColumn("job_name");
-    Column<Long> salary = longColumn("salary");
+    public Column<Integer> uid = intColumn("user");
+    public Column<String> jobName = stringColumn("job_name");
+    public Column<Long> salary = longColumn("salary");
 }
 
 class Job{
@@ -181,13 +219,26 @@ class UserJobJoin extends JoinTable<UserTable,JobTable,UserJob>{
         return (userTable.uid) .isEqualTo  (jobTable.uid);
     }
 
-    Column<Integer> uid = left.uid;
-    Column<String> name = left.name;
-    Column<String> jobName = right.jobName;
+    public Column<Integer> uid = left.uid;
+    public Column<String> name = left.name;
+    public Column<String> jobName = right.jobName;
 }
 
 class UserJob{
     public int uid;
     public String name;
     public String jobName;
+
+    @Override
+    public boolean equals(Object obj) {
+        try {
+            UserJob u = (UserJob) obj;
+            return
+                u.uid == uid &&
+                u.name.equals(name) &&
+                u.jobName.equals(jobName);
+        } catch (Exception e){
+            return false;
+        }
+    }
 }

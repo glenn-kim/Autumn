@@ -1,6 +1,11 @@
 package autumn.database;
 
+import autumn.database.jdbc.DBConnection;
+
 import java.lang.reflect.Field;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
@@ -102,27 +107,45 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     protected abstract void initInertSQLStr();
 
-    public Objects[] list(){ //select
+    public Object[] list(DBConnection conn) throws SQLException { //select
         String sql = genListSQL();
-        return null;
+        return select(conn,sql).toArray();
     }
 
     protected String genListSQL() {
         return genSeletDeletSQL(selectSQLFormat);
     }
 
-    public Object first(){ //select one
+    public Object first(DBConnection conn) throws SQLException { //select one
         String sql = genFirstSQL();
-        return null;
+        List l = select(conn,sql);
+        if(l.isEmpty())
+            return null;
+        return l.get(0);
+    }
+
+    private List<Object> select(DBConnection conn, String sql) throws SQLException {
+        ResultSet result;
+        result = conn.executeQuery(sql);
+        return processQueryResult(result);
+    }
+
+    protected List<Object> processQueryResult(ResultSet result) throws SQLException {
+        List<Object> objs = new ArrayList<>();
+        while(result.next()){
+            objs.add(table.makeData(result));
+        }
+
+        return objs;
     }
 
     protected String genFirstSQL() {
         return genSeletDeletSQL(selectFirstSQLFormat);
     }
 
-    public int delete(){ //delete
+    public int delete(DBConnection conn) throws SQLException { //delete
         String sql = genDeleteSQL();
-        return 0;
+        return conn.executeUpdate(sql);
     }
 
     protected String genDeleteSQL() {
@@ -135,7 +158,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
             condi = "1=1";
         else
             condi = whereCondition.toSQL();
-        return String.format(format,condi);
+        return String.format(format, condi);
     }
 
     public abstract InsertResult insert(Object[] data);

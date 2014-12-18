@@ -94,5 +94,7 @@ public class Table<DataType> extends AbstractTable<DataType> {
     protected String toSQL(){
         return sqlStr;
     }
+
+
 }
 

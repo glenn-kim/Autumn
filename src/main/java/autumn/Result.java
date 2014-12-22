@@ -119,7 +119,7 @@ public abstract class Result<This extends Result>{
     protected Map<String,String> mergeCookies(SessionStorage storage, Request request){
         Session session=null;
         String sessionIdCookie = storage.getSessionIdCookieName();
-        Map<String,String> tempCookie = request.getAllCookies();;
+        Map<String,String> cookies = new LinkedHashMap<>();
 
         //Create New Session Or Use Original
         if(!newSessions){
@@ -128,7 +128,8 @@ public abstract class Result<This extends Result>{
 
         if(session == null){
             session = storage.newSession();
-            tempCookie.remove(sessionIdCookie);
+            cookies.put(sessionIdCookie, session.getSessionKey());
+
         }
 
         //Insert SessionData
@@ -136,24 +137,11 @@ public abstract class Result<This extends Result>{
             session.addSessionData(sd);
         }
 
-        Map<String,String> cookies;
-
-        //Use Original Cookies or New Cookie Set
-        if(!newCookies)
-            cookies = tempCookie;
-        else
-            cookies = new HashMap<>();
 
         //Insert Cookie Input
         for(Cookie kv : cookieInput){
             cookies.put(kv.getKey(),kv.getValue());
         }
-
-        //Insert Session Key
-        cookies.put(sessionIdCookie, session.getSessionKey());
-
-        //Insert Content Type
-        cookies.put(Cookie.CONTENT_TYPE,contentType);
 
         return cookies;
     }
@@ -217,27 +205,27 @@ public abstract class Result<This extends Result>{
 
         @Override
         public TemplateResult template(String templateName) {
-            return super.template(templateName);
+            return (TemplateResult) super.template(templateName).with(new Header(Header.LOCATION, to));
         }
 
         @Override
         public TemplateResult template(TemplateEngine templateEngineInstance, String templateName) {
-            return super.template(templateEngineInstance, templateName);
+            return (TemplateResult) super.template(templateEngineInstance, templateName).with(new Header(Header.LOCATION, to));
         }
 
         @Override
         public SendFileResult sendFile(String filePath) {
-            return super.sendFile(filePath);
+            return super.sendFile(filePath).with(new Header(Header.LOCATION,to));
         }
 
         @Override
         public SendFileResult sendFile(File file) {
-            return super.sendFile(file);
+            return super.sendFile(file).with(new Header(Header.LOCATION, to));
         }
 
         @Override
         public PlainTextResult plainText(String text) {
-            return super.plainText(text);
+            return super.plainText(text).with(new Header(Header.LOCATION, to));
         }
     }
 }

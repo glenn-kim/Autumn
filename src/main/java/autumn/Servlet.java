@@ -92,10 +92,9 @@ public class Servlet extends HttpServlet{
         Set<Map.Entry<String, String>> newCookies = res.mergeCookies(sessionStorage, request).entrySet();
 
         for(Map.Entry<String,String> cookie : newCookies){
-            servletResp.addCookie(
-                    new javax.servlet.http.Cookie(
-                            cookie.getKey(),
-                            cookie.getValue()));
+            javax.servlet.http.Cookie servCookie = new javax.servlet.http.Cookie(cookie.getKey(),cookie.getValue());
+            servCookie.setPath("/");
+            servletResp.addCookie(servCookie);
         }
 
         @SuppressWarnings("unchecked")

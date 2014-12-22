@@ -1,5 +1,7 @@
 package autumn.database;
 
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.Objects;
 
 import static autumn.database.Condition.ConditionComparer.*;
@@ -96,9 +98,10 @@ public class Condition {
     protected String toSQL(){
         return sqlStr;
     }
-
     private static String toSQLStr(Object obj){
-        if(obj.getClass().equals(String.class)){
+        if(obj.getClass().equals(String.class)
+                | obj.getClass().equals(Timestamp.class)
+                | obj.getClass().equals(Date.class)){
             return String.format("'%s'",obj.toString());
         }
         return obj.toString();

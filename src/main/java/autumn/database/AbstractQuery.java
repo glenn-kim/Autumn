@@ -17,16 +17,16 @@ import java.util.function.Function;
 public abstract class AbstractQuery<T extends AbstractTable> {
     protected final static String INSERT_QUERY_FORMAT = "INSERT INTO %s VALUES %s;";
     protected final static String SELECT_QUERY_FORMAT = "SELECT %s FROM %s WHERE %s;";
-    protected final static String DELETE_QUERY_FORMAT = "DELETE FROM %s WHERE %s;";
+    protected final static String DELETE_QUERY_FORMAT = "DELETE %s FROM %s WHERE %s;";
     protected final static String UPDATE_QUERY_FORMAT = "UPDATE %s SET %s WHERE %s;";
     protected String insertSQLFormat;
+    protected String deleteSQLFormat;
     protected T table = null;
     protected List<Column> columnList = new LinkedList<>();
     protected List<Field> mappingFields = new LinkedList<>();
     private Condition whereCondition;
     private String selectSQLFormat;
     private String selectFirstSQLFormat;
-    private String deleteSQLFormat;
     private String updateSQLFormat;
 
     public AbstractQuery(Class<T> cls) {
@@ -83,9 +83,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         return field.getType().isAssignableFrom(cls);
     }
 
-    protected void initDeleteSQLStr() {
-        deleteSQLFormat = String.format(DELETE_QUERY_FORMAT, table.toSQL(),"%s");
-    }
+    protected abstract void initDeleteSQLStr();
 
     protected void initSelectSQLStr() {
         StringBuilder stringBuilder = new StringBuilder();
@@ -148,20 +146,17 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         return conn.executeUpdate(sql);
     }
 
-    protected String genDeleteSQL() {
-        return genSeletDeletSQL(deleteSQLFormat);
-    }
+    protected abstract String genDeleteSQL();
 
     private String genSeletDeletSQL(String format) {
-        String condi;
-        if(whereCondition==null)
-            condi = "1=1";
-        else
-            condi = whereCondition.toSQL();
-        return String.format(format, condi);
+
+        return String.format(format, genWhereCondition());
     }
 
-    public abstract InsertResult insert(Object[] data);
+    public int insert(DBConnection conn, Object[] data) throws SQLException {//insert
+        String sql = genInsertSQL(data);
+        return conn.executeUpdate(sql);
+    }
     protected abstract String genInsertSQL(Object[] data);
 
 
@@ -181,4 +176,13 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     public class InsertResult{}
+
+    protected String genWhereCondition(){
+        String condi;
+        if(whereCondition==null)
+            condi = "1=1";
+        else
+            condi = whereCondition.toSQL();
+        return condi;
+    }
 }

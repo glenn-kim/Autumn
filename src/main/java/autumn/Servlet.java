@@ -3,6 +3,7 @@ package autumn;
 import autumn.database.jdbc.ConnectionPool;
 import autumn.database.jdbc.JDBCConnectionPool;
 import autumn.header.Cookie;
+import autumn.header.Header;
 import autumn.header.session.DefaultSessionStorage;
 import autumn.header.session.Session;
 import autumn.header.session.SessionKeyIssuer;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -94,6 +96,12 @@ public class Servlet extends HttpServlet{
                     new javax.servlet.http.Cookie(
                             cookie.getKey(),
                             cookie.getValue()));
+        }
+
+        @SuppressWarnings("unchecked")
+        List<Header> headerList = res.getHeaderInput();
+        for(Header h : headerList){
+            servletResp.addHeader(h.getKey(),h.getValue());
         }
 
         res.writeBodyServlet(servletReq,servletResp,this.getServletContext(), servletResp.getOutputStream());

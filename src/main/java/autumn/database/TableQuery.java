@@ -2,18 +2,19 @@ package autumn.database;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.net.URLEncoder;
+import java.net.URLDecoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
 
+
 /**
  * Created by infinitu on 14. 12. 9..
  */
 public class TableQuery<T extends Table> extends AbstractQuery<T> {
-
-
     public TableQuery(Class<T> cls){
         super(cls);
     }
@@ -36,12 +37,6 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
 
         String insertTableSQL = stringBuilder.toString();
         insertSQLFormat = String.format(INSERT_QUERY_FORMAT, insertTableSQL,"%s");
-    }
-
-    @Override
-    public InsertResult insert(Object[] data){//insert
-        genInsertSQL(data);
-        return null;
     }
 
     @Override
@@ -84,6 +79,19 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
 
         return String.format(insertSQLFormat, sb.toString());
     }
+
+
+    @Override
+    protected void initDeleteSQLStr() {
+        deleteSQLFormat = String.format(DELETE_QUERY_FORMAT,table.getTag() ,table.toSQL(),"%s");
+    }
+
+
+    @Override
+    protected String genDeleteSQL() {
+        return String.format(deleteSQLFormat, genWhereCondition());
+    }
+
 
 
 }

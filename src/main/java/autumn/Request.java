@@ -8,6 +8,8 @@ import autumn.header.session.Session;
 import autumn.route.PathRouter;
 
 import javax.servlet.http.HttpServletRequest;
+import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.Map;
  */
 public class Request {
 
+    private HttpServletRequest request = null;
     private int method;
     private String path;
     private Map<String,String> cookieMap;
@@ -25,8 +28,10 @@ public class Request {
     private JDBCConnectionPool pool;
     private JDBCDConnection conn;
 
+    //TODO Extract
     public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool){
         this(parseMethod(req), parsePath(req),parseCookies(req),session, connectionPool);
+        this.request = req;
     }
 
     public Request(int method, String path) {
@@ -70,6 +75,17 @@ public class Request {
             conn = new JDBCDConnection(pool);
         return conn;
     }
+
+
+    //TODO Extract
+    public InputStream payload() throws IOException {
+        return request.getInputStream();
+    }
+
+    public String getQueryString(){
+        return request.getQueryString();
+    }
+
     protected void freeDBConn(){
         if(conn!=null){
             try {

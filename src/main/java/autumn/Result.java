@@ -1,6 +1,7 @@
 package autumn;
 
 import autumn.header.Cookie;
+import autumn.header.Header;
 import autumn.header.session.Session;
 import autumn.header.session.SessionData;
 import autumn.header.session.SessionStorage;
@@ -41,6 +42,7 @@ public abstract class Result<This extends Result>{
         templateEngineInstance.addTemplateResolver(resolver);
     }
 
+    private List<Header> headerInput = new ArrayList<>();
     private List<Cookie> cookieInput = new ArrayList<>();
     private List<SessionData> sessionDataInput = new ArrayList<>();
     private String contentType = PLAIN_TEXT; //by default
@@ -48,14 +50,14 @@ public abstract class Result<This extends Result>{
     private boolean newSessions = false;
     private int statusCode = 200;
 
-    public static final StatusCodeHolder Ok                     = new StatusCodeHolder(200);
-    public static final StatusCodeHolder MovedPermanently       = new StatusCodeHolder(301);
-    public static final StatusCodeHolder TemporaryRedirect      = new StatusCodeHolder(307);
-    public static final StatusCodeHolder BadRequest             = new StatusCodeHolder(400);
-    public static final StatusCodeHolder Unauthorized           = new StatusCodeHolder(401);
-    public static final StatusCodeHolder Forbidden              = new StatusCodeHolder(403);
-    public static final StatusCodeHolder NotFound               = new StatusCodeHolder(404);
-    public static final StatusCodeHolder InternalServerError    = new StatusCodeHolder(500);
+    public static final StatusCodeHolder Ok                             = new StatusCodeHolder(200);
+    public static final StatusCodeHolder MovedPermanently(String to)    {return new RedirectHolder(301,to);}
+    public static final StatusCodeHolder TemporaryRedirect(String to)   {return new RedirectHolder(307,to);}
+    public static final StatusCodeHolder BadRequest                     = new StatusCodeHolder(400);
+    public static final StatusCodeHolder Unauthorized                   = new StatusCodeHolder(401);
+    public static final StatusCodeHolder Forbidden                      = new StatusCodeHolder(403);
+    public static final StatusCodeHolder NotFound                       = new StatusCodeHolder(404);
+    public static final StatusCodeHolder InternalServerError            = new StatusCodeHolder(500);
 
     public static StatusCodeHolder Status(int code){
         return new StatusCodeHolder(code);
@@ -101,6 +103,11 @@ public abstract class Result<This extends Result>{
     public This withNewSession(SessionData... sessionData){
         this.newSessions=true;
         Collections.addAll(sessionDataInput, sessionData);
+        return (This)this;
+    }
+
+    public This with(Header... header){
+        Collections.addAll(headerInput,header);
         return (This)this;
     }
 
@@ -151,6 +158,10 @@ public abstract class Result<This extends Result>{
         return cookies;
     }
 
+    protected List<Header> getHeaderInput(){
+        return headerInput;
+    }
+
     protected abstract void writeBody(OutputStream stream) throws IOException;
 
     protected void writeBodyServlet( HttpServletRequest request,
@@ -195,6 +206,38 @@ public abstract class Result<This extends Result>{
 
         public PlainTextResult plainText(String text){
             return ResultResolver.plainText(status, text);
+        }
+    }
+    public static class RedirectHolder extends StatusCodeHolder{
+        private String to;
+        private RedirectHolder(int status, String to) {
+            super(status);
+            this.to = to;
+        }
+
+        @Override
+        public TemplateResult template(String templateName) {
+            return super.template(templateName);
+        }
+
+        @Override
+        public TemplateResult template(TemplateEngine templateEngineInstance, String templateName) {
+            return super.template(templateEngineInstance, templateName);
+        }
+
+        @Override
+        public SendFileResult sendFile(String filePath) {
+            return super.sendFile(filePath);
+        }
+
+        @Override
+        public SendFileResult sendFile(File file) {
+            return super.sendFile(file);
+        }
+
+        @Override
+        public PlainTextResult plainText(String text) {
+            return super.plainText(text);
         }
     }
 }

@@ -28,4 +28,10 @@ public class KV<T> {
         this.key = key;
         this.value = value;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        KV kv = (KV) obj;
+        return kv.key.equals(key) && kv.value.equals(value);
+    }
 }

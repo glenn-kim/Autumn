@@ -12,13 +12,6 @@ import static autumn.database.Condition.ConditionComparer.*;
 public class Condition {
     private String sqlStr;
 
-//    protected static final int BIGGER_THAN = 0;
-//    protected static final int SMALLER_THAN = 1;
-//    protected static final int BIGGER_OR_EQUAL = 2;
-//    protected static final int SMALLER_OR_EQUAL = 3;
-//    protected static final int EQUALS = 4;
-//    protected static final int NOT_EQUALS = 5;
-
     public static enum ConditionComparer{
         BIGGER_THAN,
         SMALLER_THAN,

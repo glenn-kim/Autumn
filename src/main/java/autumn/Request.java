@@ -5,7 +5,11 @@ import autumn.database.jdbc.JDBCConnectionPool;
 import autumn.database.jdbc.JDBCDConnection;
 import autumn.header.Cookie;
 import autumn.header.session.Session;
+import autumn.request.FormUrlEncodedPayload;
+import autumn.request.RequestPayload;
+import autumn.request.UrlEncodedParameterInput;
 import autumn.route.PathRouter;
+import autumn.util.KV;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
@@ -18,32 +22,42 @@ import java.util.Map;
 /**
  * Created by infinitu on 14. 11. 2..
  */
-public class Request {
+public class Request{
 
     private HttpServletRequest request = null;
     private int method;
     private String path;
+    private String contentType;
     private Map<String,String> cookieMap;
     private Session session;
+    private InputStream inputStream;
+    private RequestPayload body;
     private JDBCConnectionPool pool;
     private JDBCDConnection conn;
+    private UrlEncodedParameterInput urlquery;
 
     //TODO Extract
-    public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool){
-        this(parseMethod(req), parsePath(req),parseCookies(req),session, connectionPool);
+    public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool) throws IOException {
+        this(parseMethod(req), parsePath(req),req.getQueryString(),req.getContentType(),parseCookies(req),session,parseInputStream(parseMethod(req), req), connectionPool);
         this.request = req;
     }
 
     public Request(int method, String path) {
-        this(method,path,null,null,null);
+        this(method,path,null,null,null,null,null,null);
     }
 
-    public Request(int method, String path, Map<String,String> cookieMap, Session session, JDBCConnectionPool connectionPool){
+    public Request(int method, String path, String queryStr, String contentType, Map<String,String> cookieMap, Session session,InputStream inputStream, JDBCConnectionPool connectionPool){
         this.method = method;
         this.path = path;
+        this.contentType=contentType;
         this.cookieMap = cookieMap;
         this.session = session;
+        this.inputStream = inputStream;
         this.pool = connectionPool;
+        this.body = RequestPayload.holdPayload(contentType, inputStream);
+        if(queryStr!=null && queryStr.length()>2){
+            urlquery = new UrlEncodedParameterInput(queryStr);
+        }
     }
 
     public String getPath() {
@@ -76,14 +90,18 @@ public class Request {
         return conn;
     }
 
-
-    //TODO Extract
-    public InputStream payload() throws IOException {
-        return request.getInputStream();
+    public RequestPayload body(){
+        return body;
     }
 
-    public String getQueryString(){
-        return request.getQueryString();
+    public String getUrlQueryParam(String key){
+        if(urlquery==null)return null;
+        return urlquery.getParam(key);
+    }
+
+    public List<KV> getUrlQueryInputs(){
+        if(urlquery==null)return null;
+        return urlquery.getInputs();
     }
 
     protected void freeDBConn(){
@@ -128,5 +146,10 @@ public class Request {
         return cookieMap;
     }
 
-    //TODO Add Parsing Http Request Query Parameters.
+    static private InputStream parseInputStream(int method, HttpServletRequest req) throws IOException {
+        InputStream in = null;
+        if(method != PathRouter.REST_METHOD_ID_GET)
+            in = req.getInputStream();
+        return in;
+    }
 }

@@ -8,7 +8,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Objects;
 import java.util.function.Function;
 
 /**
@@ -105,33 +104,33 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     protected abstract void initInertSQLStr();
 
-    public Object[] list(DBConnection conn) throws SQLException { //select
+    public <DT> List<DT> list(DBConnection conn) throws SQLException { //select
         String sql = genListSQL();
-        return select(conn,sql).toArray();
+        return select(conn,sql);
     }
 
     protected String genListSQL() {
         return genSeletDeletSQL(selectSQLFormat);
     }
 
-    public Object first(DBConnection conn) throws SQLException { //select one
+    public <DT> DT first(DBConnection conn) throws SQLException { //select one
         String sql = genFirstSQL();
-        List l = select(conn,sql);
+        List<DT> l = select(conn, sql);
         if(l.isEmpty())
             return null;
         return l.get(0);
     }
 
-    private List<Object> select(DBConnection conn, String sql) throws SQLException {
+    private <DT> List<DT> select(DBConnection conn, String sql) throws SQLException {
         ResultSet result;
         result = conn.executeQuery(sql);
         return processQueryResult(result);
     }
 
-    protected List<Object> processQueryResult(ResultSet result) throws SQLException {
-        List<Object> objs = new ArrayList<>();
+    protected <DT> List<DT> processQueryResult(ResultSet result) throws SQLException {
+        List<DT> objs = new ArrayList<>();
         while(result.next()){
-            objs.add(table.makeData(result));
+            objs.add((DT) table.makeData(result));
         }
 
         return objs;

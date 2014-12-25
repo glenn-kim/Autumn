@@ -59,9 +59,11 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
                     sb.append(prefix_);
                     prefix_=", ";
 
-                    if(o.getClass().equals(String.class)
-                            | o.getClass().equals(Timestamp.class)
-                            | o.getClass().equals(Date.class)){
+                    if(o==null)
+                        sb.append("NULL");
+                    else if(o.getClass().equals(String.class)
+                                | o.getClass().equals(Timestamp.class)
+                                | o.getClass().equals(Date.class)){
                         sb.append('\'');
                         sb.append(o.toString());
                         sb.append('\'');

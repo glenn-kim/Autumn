@@ -157,6 +157,12 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         String sql = genInsertSQL(data);
         return conn.executeUpdate(sql);
     }
+
+    public List<Integer> insertRetunningGenKey(DBConnection conn, Object[] data) throws SQLException {//insert
+        String sql = genInsertSQL(data);
+        return conn.executeUpdateReturningGenkey(sql);
+    }
+
     protected abstract String genInsertSQL(Object[] data);
 
 

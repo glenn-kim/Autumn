@@ -2,6 +2,7 @@ package autumn.database.jdbc;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 /**
  * Created by infinitu on 14. 12. 18..
@@ -17,4 +18,6 @@ public interface DBConnection {
 
     ResultSet executeQuery(String sql) throws SQLException;
     int executeUpdate(String sql) throws SQLException;
+
+    List<Integer> executeUpdateReturningGenkey(String sql) throws SQLException;
 }

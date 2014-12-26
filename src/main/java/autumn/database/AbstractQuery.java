@@ -106,7 +106,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> List<DT> list(DBConnection conn) throws SQLException { //select
         String sql = genListSQL();
-        return select(conn,sql);
+        return select(conn, sql);
     }
 
     protected String genListSQL() {
@@ -152,14 +152,25 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         return String.format(format, genWhereCondition());
     }
 
-    public int insert(DBConnection conn, Object[] data) throws SQLException {//insert
+    public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
         return conn.executeUpdate(sql);
     }
 
-    public List<Integer> insertRetunningGenKey(DBConnection conn, Object[] data) throws SQLException {//insert
+    public <DT> int insert(DBConnection conn, DT data) throws SQLException {//insert
+        return insert(conn,new Object[]{data});
+    }
+
+    public <DT> List<Integer> insertRetunningGenKey(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
         return conn.executeUpdateReturningGenkey(sql);
+    }
+
+    public <DT> Integer insertRetunningGenKey(DBConnection conn, DT data) throws SQLException {//insert
+        List<Integer> list = insertRetunningGenKey(conn,new Object[]{data});
+        if(list == null || list.size()==0)
+            return null;
+        return list.get(0);
     }
 
     protected abstract String genInsertSQL(Object[] data);

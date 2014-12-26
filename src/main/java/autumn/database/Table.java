@@ -1,16 +1,12 @@
 package autumn.database;
 
 import autumn.annotation.Model;
-import autumn.annotation.POST;
 import org.reflections.Reflections;
 
-import javax.xml.crypto.Data;
-import java.lang.reflect.*;
-import java.sql.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.MalformedParametersException;
 import java.sql.Date;
-import java.util.*;
-import java.util.function.BiFunction;
-import java.util.function.Function;
+import java.sql.Timestamp;
 
 /**
  * Created by infinitu on 14. 12. 9..
@@ -49,6 +45,9 @@ public class Table<DataType> extends AbstractTable<DataType> {
     }
     public Column<Long>         longColumn(String columnName){
         return new Column<>(columnName,tag,Long.class);
+    }
+    public Column<Boolean>      booleanColumn(String columnName){
+        return new Column<>(columnName,tag,Boolean.class);
     }
     public Column<Double>       doubleColumn(String columnName){
         return new Column<>(columnName,tag,Double.class);

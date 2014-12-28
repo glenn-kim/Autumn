@@ -5,6 +5,7 @@ import com.google.gson.*;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.DateFormat;
 
 /**
  * Created by infinitu on 14. 12. 22..
@@ -13,7 +14,7 @@ public class JsonPayload {
     private static ThreadLocal<Gson> gson = new ThreadLocal<Gson>(){
         @Override
         protected Gson initialValue() {
-            return new Gson();
+            return (new GsonBuilder()).setDateFormat("yyyy/MM/dd HH:mm:ss").create();
         }
     };
     private static JsonParser jsonParsor = new JsonParser();

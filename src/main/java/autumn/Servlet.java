@@ -8,6 +8,7 @@ import autumn.header.session.DefaultSessionStorage;
 import autumn.header.session.Session;
 import autumn.header.session.SessionKeyIssuer;
 import autumn.header.session.SessionStorage;
+import autumn.result.ExceptionResult;
 import autumn.result.ResultResolver;
 import autumn.route.ControllerReflector;
 import autumn.route.PathRouter;
@@ -23,6 +24,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 
 /**
@@ -39,6 +41,14 @@ public class Servlet extends HttpServlet{
     @Override
     public void init() throws ServletException {
         super.init();
+
+        //Must not to commit
+        Properties p = System.getProperties();
+        p.put("db.url", "***REMOVED***");
+        p.put("db.user", "***REMOVED***");
+        p.put("db.password","***REMOVED***");
+
+
         //System.out.println("init called");
         try{
             invoker = (new ControllerReflector()).generateActionInvoker();
@@ -73,7 +83,11 @@ public class Servlet extends HttpServlet{
 
         try {
             res = invoker.doAct(request);
-        } catch (InvocationTargetException | IllegalAccessException e) {
+        }
+        catch (ExceptionResult result){
+            res = result.getResult();
+        }
+        catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace(System.err);
             //TODO 500 error
             return;

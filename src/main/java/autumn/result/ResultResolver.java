@@ -1,5 +1,6 @@
 package autumn.result;
 
+import com.google.gson.JsonElement;
 import org.thymeleaf.TemplateEngine;
 
 import java.io.File;
@@ -24,6 +25,20 @@ public final class ResultResolver {
 
     public  static PlainTextResult plainText(int statusCode, String text){
         return new PlainTextResult(statusCode, text);
+    }
+
+    public  static JsonResult jsonObject(int statusCode){
+        return new JsonResult(statusCode, true);
+    }
+
+    public  static JsonResult jsonArray(int statusCode){
+        return new JsonResult(statusCode, false);
+    }
+    public  static JsonResult json(int statusCode, Object object){
+        return new JsonResult(statusCode, object);
+    }
+    public  static JsonResult json(int statusCode, JsonElement jsonElement){
+        return new JsonResult(statusCode, jsonElement);
     }
 
 

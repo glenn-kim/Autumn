@@ -5,10 +5,8 @@ import autumn.header.Header;
 import autumn.header.session.Session;
 import autumn.header.session.SessionData;
 import autumn.header.session.SessionStorage;
-import autumn.result.PlainTextResult;
-import autumn.result.ResultResolver;
-import autumn.result.SendFileResult;
-import autumn.result.TemplateResult;
+import autumn.result.*;
+import com.google.gson.JsonElement;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.FileTemplateResolver;
@@ -195,6 +193,21 @@ public abstract class Result<This extends Result>{
         public PlainTextResult plainText(String text){
             return ResultResolver.plainText(status, text);
         }
+
+        public  JsonResult jsonObject(){
+            return ResultResolver.jsonObject(status);
+        }
+
+        public  JsonResult jsonArray(){
+            return ResultResolver.jsonArray(status);
+        }
+        public  JsonResult json(Object object){
+            return ResultResolver.json(status, object);
+        }
+        public JsonResult json(JsonElement jsonElement){
+            return ResultResolver.json(status, jsonElement);
+        }
+
     }
     public static class RedirectHolder extends StatusCodeHolder{
         private String to;

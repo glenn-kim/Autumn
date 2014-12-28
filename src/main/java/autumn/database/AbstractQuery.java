@@ -3,6 +3,7 @@ package autumn.database;
 import autumn.database.jdbc.DBConnection;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -39,6 +40,8 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         Field[] fields = cls.getDeclaredFields();
 
         for (Field f : fields) {
+            if((f.getModifiers()&Modifier.PUBLIC)==0)
+                continue;
             try {
                 Column col = (Column) f.get(table);
                 Class colCls = col.getContentsType();

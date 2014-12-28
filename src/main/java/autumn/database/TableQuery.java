@@ -6,6 +6,8 @@ import java.net.URLEncoder;
 import java.net.URLDecoder;
 import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Function;
@@ -18,6 +20,7 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
     public TableQuery(Class<T> cls){
         super(cls);
     }
+    public static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 
     @Override
     protected void initInertSQLStr() {
@@ -61,11 +64,16 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
 
                     if(o==null)
                         sb.append("NULL");
-                    else if(o.getClass().equals(String.class)
-                                | o.getClass().equals(Timestamp.class)
-                                | o.getClass().equals(Date.class)){
+                    else if(o.getClass().equals(String.class)){
                         sb.append('\'');
                         sb.append(o.toString());
+                        sb.append('\'');
+                    }
+                    else if(o.getClass().equals(Timestamp.class)
+                            | o.getClass().equals(Date.class)
+                            | o.getClass().equals(java.util.Date.class)){
+                        sb.append('\'');
+                        sb.append(dateFormatter.format(o));
                         sb.append('\'');
                     }
                     else

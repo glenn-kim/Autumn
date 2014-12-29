@@ -3,9 +3,13 @@ package autumn.route;
 import autumn.Request;
 import autumn.Result;
 import autumn.annotation.INP;
+import autumn.result.ResultResolver;
+import autumn.result.StaticResourceResult;
 
 import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -87,7 +91,22 @@ public class PathRouter {
 
         @Override
         public Result doAct(Request req) throws InvocationTargetException, IllegalAccessException {
-            return invokeAction(splitURLPath(req.getPath()),new LinkedList<>(),req);
+            Result ret = invokeAction(splitURLPath(req.getPath()), new LinkedList<>(), req);
+            if(ret == null && req.getPath().startsWith(StaticResourceResult.DEFAULT_STATIC_URI)) {
+                String path = StaticResourceResult.DEFAULT_STATIC_DIRECTORY +"/"+
+                        req.getPath().substring(StaticResourceResult.DEFAULT_STATIC_URI.length());
+                File res;
+                try {
+                    res = new File(this.getClass().getClassLoader().getResource(path).getFile());
+                    if (res.canRead())
+                        return ResultResolver.staticResource(200, res);
+                }
+                catch (Exception e) {
+                    //no such resource;
+                    return null;
+                }
+            }
+            return null;
         }
 
         private ListIterator<String> splitURLPath(String path){

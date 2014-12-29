@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import org.thymeleaf.TemplateEngine;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 
 /**
  * Created by infinitu on 14. 12. 10..
@@ -39,6 +40,10 @@ public final class ResultResolver {
     }
     public  static JsonResult json(int statusCode, JsonElement jsonElement){
         return new JsonResult(statusCode, jsonElement);
+    }
+
+    public static StaticResourceResult staticResource(int statusCode, File file) throws FileNotFoundException {
+        return new StaticResourceResult(statusCode,file);
     }
 
 

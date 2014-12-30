@@ -9,7 +9,6 @@ import autumn.result.StaticResourceResult;
 import javax.annotation.Nullable;
 import javax.management.MalformedObjectNameException;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.*;
@@ -106,7 +105,7 @@ public class PathRouter {
                     return null;
                 }
             }
-            return null;
+            return ret;
         }
 
         private ListIterator<String> splitURLPath(String path){

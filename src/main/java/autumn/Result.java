@@ -8,8 +8,7 @@ import autumn.header.session.SessionStorage;
 import autumn.result.*;
 import com.google.gson.JsonElement;
 import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
-import org.thymeleaf.templateresolver.FileTemplateResolver;
+import org.thymeleaf.messageresolver.StandardMessageResolver;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 import org.thymeleaf.templateresolver.TemplateResolver;
 
@@ -17,6 +16,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
@@ -38,6 +38,18 @@ public abstract class Result<This extends Result>{
         resolver.setPrefix("/WEB-INF/templates/"); //TODO Enable Configurable.
         resolver.setSuffix(".html");
         templateEngineInstance.addTemplateResolver(resolver);
+
+        Properties messages = new Properties();
+        try {
+            messages.load(Result.class.getResourceAsStream("/messages.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        StandardMessageResolver standardMessageResolver = new StandardMessageResolver();
+        standardMessageResolver.setDefaultMessages(messages);
+
+        templateEngineInstance.addMessageResolver(standardMessageResolver);
     }
 
     private List<Header> headerInput = new ArrayList<>();

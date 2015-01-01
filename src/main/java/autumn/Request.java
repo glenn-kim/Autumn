@@ -15,6 +15,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +30,7 @@ public class Request{
     private String path;
     private String contentType;
     private Map<String,String> cookieMap;
+    private Map<String,String> headerMap;
     private Session session;
     private InputStream inputStream;
     private RequestPayload body;
@@ -38,19 +40,20 @@ public class Request{
 
     //TODO Extract
     public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool) throws IOException {
-        this(parseMethod(req), parsePath(req),req.getQueryString(),req.getContentType(),parseCookies(req),session,parseInputStream(parseMethod(req), req), connectionPool);
+        this(parseMethod(req), parsePath(req),req.getQueryString(),req.getContentType(),parseCookies(req),parseHeaders(req),session,parseInputStream(parseMethod(req), req), connectionPool);
         this.request = req;
     }
 
     public Request(int method, String path) {
-        this(method,path,null,null,null,null,null,null);
+        this(method,path,null,null,null,null,null,null,null);
     }
 
-    public Request(int method, String path, String queryStr, String contentType, Map<String,String> cookieMap, Session session,InputStream inputStream, JDBCConnectionPool connectionPool){
+    public Request(int method, String path, String queryStr, String contentType, Map<String,String> cookieMap, Map<String,String> headerMap, Session session,InputStream inputStream, JDBCConnectionPool connectionPool){
         this.method = method;
         this.path = path;
         this.contentType=contentType;
         this.cookieMap = cookieMap;
+        this.headerMap = headerMap;
         this.session = session;
         this.inputStream = inputStream;
         this.pool = connectionPool;
@@ -72,6 +75,12 @@ public class Request{
         if(cookieMap == null)
             return null;
         return cookieMap.get(key);
+    }
+
+    public String getHeader(String key) {
+        if(cookieMap == null)
+            return null;
+        return headerMap.get(key.toLowerCase());
     }
 
     public Object getSession(String key) {
@@ -144,6 +153,16 @@ public class Request{
             cookieMap.put(cookie.getName(),cookie.getValue());
         }
         return cookieMap;
+    }
+
+    static private Map<String,String> parseHeaders(HttpServletRequest req){
+        Map<String,String> headerMap = new LinkedHashMap<>();
+        Enumeration<String> keys = req.getHeaderNames();
+        while(keys.hasMoreElements()){
+            String key = keys.nextElement();
+            headerMap.put(key,req.getHeader(key));
+        }
+        return headerMap;
     }
 
     static private InputStream parseInputStream(int method, HttpServletRequest req) throws IOException {

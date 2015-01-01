@@ -35,13 +35,13 @@ public class HttpQueryTest{
     @Test
     public void testGetParameterInUrlEncodedForm(){
 
-        Request req = new Request(0,null,urlforminput,null,null,null,new ByteArrayInputStream(urlforminput.getBytes()),null);
+        Request req = new Request(0,null,urlforminput,null,null,null,null,new ByteArrayInputStream(urlforminput.getBytes()),null);
         assertArrayEquals(urlformexpected,req.getUrlQueryInputs().toArray());
     }
 
     @Test
     public void testBodyMappingToJSON(){
-        Request req = new Request(0,null,urlforminput,null,null,null,new ByteArrayInputStream(jsoninput.getBytes()),null);
+        Request req = new Request(0,null,urlforminput,null,null,null,null,new ByteArrayInputStream(jsoninput.getBytes()),null);
         testDataSet set = req.body().asJson().mapping(testDataSet.class);
         assertEquals(set,jsonExpected);
 

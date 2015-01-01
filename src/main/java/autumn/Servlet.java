@@ -44,9 +44,9 @@ public class Servlet extends HttpServlet{
 
         //Must not to commit
         Properties p = System.getProperties();
-        p.put("db.url", "jdbc:mysql://vm.link-to-rink.com:8080/ggp_1?characterEncoding=UTF-8&useUnicode=true");
-        p.put("db.user", "feona");
-        p.put("db.password","dhwlddj1004");
+        p.put("db.url", "***REMOVED***");
+        p.put("db.user", "***REMOVED***");
+        p.put("db.password","***REMOVED***");
 
 
         //System.out.println("init called");

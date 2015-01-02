@@ -1,15 +1,10 @@
 package autumn;
 
-import autumn.database.jdbc.ConnectionPool;
 import autumn.database.jdbc.JDBCConnectionPool;
-import autumn.header.Cookie;
 import autumn.header.Header;
 import autumn.header.session.DefaultSessionStorage;
-import autumn.header.session.Session;
 import autumn.header.session.SessionKeyIssuer;
 import autumn.header.session.SessionStorage;
-import autumn.result.ExceptionResult;
-import autumn.result.ResultResolver;
 import autumn.route.ControllerReflector;
 import autumn.route.PathRouter;
 
@@ -19,7 +14,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
@@ -44,9 +38,9 @@ public class Servlet extends HttpServlet{
 
         //Must not to commit
         Properties p = System.getProperties();
-        p.put("db.url", "jdbc:mysql://vm.link-to-rink.com:8080/ggp_1?characterEncoding=UTF-8&useUnicode=true");
-        p.put("db.user", "feona");
-        p.put("db.password","dhwlddj1004");
+        p.put("db.url", "***REMOVED***");
+        p.put("db.user", "***REMOVED***");
+        p.put("db.password","***REMOVED***");
 
 
         //System.out.println("init called");
@@ -83,9 +77,6 @@ public class Servlet extends HttpServlet{
 
         try {
             res = invoker.doAct(request);
-        }
-        catch (ExceptionResult result){
-            res = result.getResult();
         }
         catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace(System.err);

@@ -2,7 +2,6 @@ package autumn.database;
 
 import java.sql.Date;
 import java.sql.Timestamp;
-import java.util.Objects;
 
 import static autumn.database.Condition.ConditionComparer.*;
 

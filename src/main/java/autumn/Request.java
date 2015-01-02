@@ -3,9 +3,7 @@ package autumn;
 import autumn.database.jdbc.DBConnection;
 import autumn.database.jdbc.JDBCConnectionPool;
 import autumn.database.jdbc.JDBCDConnection;
-import autumn.header.Cookie;
 import autumn.header.session.Session;
-import autumn.request.FormUrlEncodedPayload;
 import autumn.request.RequestPayload;
 import autumn.request.UrlEncodedParameterInput;
 import autumn.route.PathRouter;
@@ -15,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
 import java.io.InputStream;
 import java.sql.SQLException;
+import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +28,7 @@ public class Request{
     private String path;
     private String contentType;
     private Map<String,String> cookieMap;
+    private Map<String,String> headerMap;
     private Session session;
     private InputStream inputStream;
     private RequestPayload body;
@@ -38,19 +38,20 @@ public class Request{
 
     //TODO Extract
     public Request(HttpServletRequest req, Session session, JDBCConnectionPool connectionPool) throws IOException {
-        this(parseMethod(req), parsePath(req),req.getQueryString(),req.getContentType(),parseCookies(req),session,parseInputStream(parseMethod(req), req), connectionPool);
+        this(parseMethod(req), parsePath(req),req.getQueryString(),req.getContentType(),parseCookies(req),parseHeaders(req),session,parseInputStream(parseMethod(req), req), connectionPool);
         this.request = req;
     }
 
     public Request(int method, String path) {
-        this(method,path,null,null,null,null,null,null);
+        this(method,path,null,null,null,null,null,null,null);
     }
 
-    public Request(int method, String path, String queryStr, String contentType, Map<String,String> cookieMap, Session session,InputStream inputStream, JDBCConnectionPool connectionPool){
+    public Request(int method, String path, String queryStr, String contentType, Map<String,String> cookieMap, Map<String,String> headerMap, Session session,InputStream inputStream, JDBCConnectionPool connectionPool){
         this.method = method;
         this.path = path;
         this.contentType=contentType;
         this.cookieMap = cookieMap;
+        this.headerMap = headerMap;
         this.session = session;
         this.inputStream = inputStream;
         this.pool = connectionPool;
@@ -58,6 +59,10 @@ public class Request{
         if(queryStr!=null && queryStr.length()>2){
             urlquery = new UrlEncodedParameterInput(queryStr);
         }
+    }
+
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
     public String getPath() {
@@ -72,6 +77,12 @@ public class Request{
         if(cookieMap == null)
             return null;
         return cookieMap.get(key);
+    }
+
+    public String getHeader(String key) {
+        if(cookieMap == null)
+            return null;
+        return headerMap.get(key.toLowerCase());
     }
 
     public Object getSession(String key) {
@@ -146,10 +157,24 @@ public class Request{
         return cookieMap;
     }
 
+    static private Map<String,String> parseHeaders(HttpServletRequest req){
+        Map<String,String> headerMap = new LinkedHashMap<>();
+        Enumeration<String> keys = req.getHeaderNames();
+        while(keys.hasMoreElements()){
+            String key = keys.nextElement();
+            headerMap.put(key,req.getHeader(key));
+        }
+        return headerMap;
+    }
+
     static private InputStream parseInputStream(int method, HttpServletRequest req) throws IOException {
         InputStream in = null;
         if(method != PathRouter.REST_METHOD_ID_GET)
             in = req.getInputStream();
         return in;
+    }
+
+    public String getAcceptType() {
+        return request.getHeader("Accept");
     }
 }

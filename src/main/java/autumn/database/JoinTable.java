@@ -1,7 +1,5 @@
 package autumn.database;
 
-import java.util.function.BiFunction;
-
 /**
  * Created by infinitu on 14. 12. 12..
  */

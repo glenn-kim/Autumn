@@ -164,13 +164,13 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         return insert(conn,new Object[]{data});
     }
 
-    public <DT> List<Integer> insertRetunningGenKey(DBConnection conn, DT[] data) throws SQLException {//insert
+    public <DT> List<Integer> insertReturningGenKey(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
         return conn.executeUpdateReturningGenkey(sql);
     }
 
-    public <DT> Integer insertRetunningGenKey(DBConnection conn, DT data) throws SQLException {//insert
-        List<Integer> list = insertRetunningGenKey(conn,new Object[]{data});
+    public <DT> Integer insertReturningGenKey(DBConnection conn, DT data) throws SQLException {//insert
+        List<Integer> list = insertReturningGenKey(conn, new Object[]{data});
         if(list == null || list.size()==0)
             return null;
         return list.get(0);

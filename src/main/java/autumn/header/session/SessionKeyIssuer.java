@@ -1,7 +1,6 @@
 package autumn.header.session;
 
 import javax.crypto.KeyGenerator;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Base64;
 

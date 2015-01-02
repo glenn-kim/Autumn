@@ -2,14 +2,10 @@ package autumn.database;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.MalformedParametersException;
-import java.lang.reflect.ParameterizedType;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
-import java.util.function.BiFunction;
 
 /**
  * Created by infinitu on 14. 12. 12..

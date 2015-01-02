@@ -1,7 +1,5 @@
 package autumn.database;
 
-import java.lang.reflect.ParameterizedType;
-
 import static autumn.database.Condition.ConditionComparer.*;
 
 /**

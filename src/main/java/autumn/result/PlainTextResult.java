@@ -1,14 +1,7 @@
 package autumn.result;
 
 import autumn.Result;
-import autumn.header.Cookie;
-import org.apache.tomcat.util.http.fileupload.IOUtils;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 

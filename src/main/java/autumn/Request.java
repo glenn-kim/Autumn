@@ -3,9 +3,7 @@ package autumn;
 import autumn.database.jdbc.DBConnection;
 import autumn.database.jdbc.JDBCConnectionPool;
 import autumn.database.jdbc.JDBCDConnection;
-import autumn.header.Cookie;
 import autumn.header.session.Session;
-import autumn.request.FormUrlEncodedPayload;
 import autumn.request.RequestPayload;
 import autumn.request.UrlEncodedParameterInput;
 import autumn.route.PathRouter;
@@ -61,6 +59,10 @@ public class Request{
         if(queryStr!=null && queryStr.length()>2){
             urlquery = new UrlEncodedParameterInput(queryStr);
         }
+    }
+
+    public HttpServletRequest getRequest() {
+        return request;
     }
 
     public String getPath() {
@@ -170,5 +172,9 @@ public class Request{
         if(method != PathRouter.REST_METHOD_ID_GET)
             in = req.getInputStream();
         return in;
+    }
+
+    public String getAcceptType() {
+        return request.getHeader("Accept");
     }
 }

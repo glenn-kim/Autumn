@@ -1,16 +1,10 @@
 package autumn.database;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.ParameterizedType;
-import java.net.URLEncoder;
-import java.net.URLDecoder;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Function;
 
 
 /**

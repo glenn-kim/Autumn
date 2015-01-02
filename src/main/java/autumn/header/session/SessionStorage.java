@@ -1,7 +1,5 @@
 package autumn.header.session;
 
-import java.util.Map;
-
 /**
  * Created by infinitu on 14. 12. 4..
  */

@@ -53,7 +53,7 @@ public class PathRouter {
         ActionWrap[] actions = {null,null,null,null,null,null,null,null};
 
         //temporary status.
-        List<String> whildcardNamespaceStatus = null;
+        List<String> wildcardNamespaceStatus = null;
 
         PathNode(String node){
             this.nodeName = node;
@@ -70,7 +70,7 @@ public class PathRouter {
         @Override
         public PathAllocator path(String path) {
             Iterator<String> iter = splitURLPath(path);
-            List<String> nsStatus = whildcardNamespaceStatus;
+            List<String> nsStatus = wildcardNamespaceStatus;
             return createTree(iter,nsStatus);
         }
 
@@ -81,8 +81,8 @@ public class PathRouter {
                 return this;
             }
 
-            ActionWrap action = new ActionWrap(method,whildcardNamespaceStatus);
-            whildcardNamespaceStatus = null;
+            ActionWrap action = new ActionWrap(method, wildcardNamespaceStatus);
+            wildcardNamespaceStatus = null;
             this.actions[RESTMethod] = action;
 
             return this;
@@ -119,7 +119,7 @@ public class PathRouter {
         private PathAllocator createTree(Iterator<String> pathIter,
                                          @Nullable List<String> whildcardNamespace){
             if(!pathIter.hasNext()){
-                this.whildcardNamespaceStatus = whildcardNamespace;
+                this.wildcardNamespaceStatus = whildcardNamespace;
                 return this;
             }
 
@@ -190,7 +190,7 @@ public class PathRouter {
         Method method;
         int[] paramIdxMap;
 
-        private ActionWrap(Method method, List<String> whildcardNamespace)
+        private ActionWrap(Method method, List<String> wildcardNamespace)
                 throws MalformedObjectNameException {
 
             this.method = method;
@@ -202,13 +202,13 @@ public class PathRouter {
             if(!Result.class.isAssignableFrom(method.getReturnType()))
                 throw new MalformedParametersException("method should returns Result Type.");
 
-            if(whildcardNamespace!=null){
-                if(actionParam.length > whildcardNamespace.size()+1)
-                    throw new MalformedParametersException("wrong whild card parameters.");
+            if(wildcardNamespace!=null){
+                if(actionParam.length > wildcardNamespace.size()+1)
+                    throw new MalformedParametersException("wrong wild card parameters.");
             }
             else{
                 if(actionParam.length > 1)
-                    throw new MalformedParametersException("wrong whild card parameters." +
+                    throw new MalformedParametersException("wrong wild card parameters." +
                             " it request "+actionParam.length+" parameter");
             }
 
@@ -231,8 +231,8 @@ public class PathRouter {
                     if(urlPatternParamName == null)
                         throw new MalformedParametersException("Parameter should be annotated by @INP");
 
-                    int paramIdx = whildcardNamespace != null ?
-                                        whildcardNamespace.indexOf(urlPatternParamName) :
+                    int paramIdx = wildcardNamespace != null ?
+                                        wildcardNamespace.indexOf(urlPatternParamName) :
                                         -1;
 
                     if(paramIdx < 0)

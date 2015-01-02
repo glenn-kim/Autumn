@@ -6,8 +6,8 @@ import java.util.function.BiFunction;
  * Created by infinitu on 14. 12. 12..
  */
 public abstract class JoinTable<Left extends AbstractTable,Right extends AbstractTable,DataType> extends AbstractTable<DataType> {
-    protected Left left;
-    protected Right right;
+    public Left left;
+    public Right right;
     protected Condition joinCondition;
     private String sqlStr;
 

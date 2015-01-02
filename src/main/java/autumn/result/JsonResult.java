@@ -1,10 +1,7 @@
 package autumn.result;
 
 import autumn.Result;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -16,7 +13,9 @@ public class JsonResult extends Result<JsonResult> {
     private static ThreadLocal<Gson> gson = new ThreadLocal<Gson>(){
         @Override
         protected Gson initialValue() {
-            return new Gson();
+            GsonBuilder gb = new GsonBuilder();
+            gb.excludeFieldsWithoutExposeAnnotation();
+            return gb.create();
         }
     };
 

@@ -190,7 +190,10 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     protected String genUpdateSQL(){return "";}
 
     public AbstractQuery<T> where(Function<T,Condition> conditionFunc) {
-        this.whereCondition=conditionFunc.apply(table);
+        if(this.whereCondition == null)
+            this.whereCondition=conditionFunc.apply(table);
+        else
+            this.whereCondition.and(conditionFunc.apply(table));
         return this;
     }
 

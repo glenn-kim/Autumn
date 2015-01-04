@@ -7,14 +7,16 @@ public abstract class JoinTable<Left extends AbstractTable,Right extends Abstrac
     public Left left;
     public Right right;
     protected Condition joinCondition;
+    protected String sqlStrFormat =  "%s INNER JOIN %s ON %s";
     private String sqlStr;
+
 
     public JoinTable(Left left, Right right,Class<DataType> dataTypeClass) throws NoSuchFieldException {
         this.left = left;
         this.right = right;
         this.mappingDataType(dataTypeClass);
         this.joinCondition = on(left,right);
-        sqlStr = String.format("%s INNER JOIN %s ON %s",left.toSQL(),right.toSQL(),joinCondition.toSQL());
+        sqlStr = String.format(sqlStrFormat,left.toSQL(),right.toSQL(),joinCondition.toSQL());
     }
 
 

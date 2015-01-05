@@ -32,7 +32,21 @@ public class PathRouter {
     private static final String WILD_CARD_REGEX_2 = "^:[^:]+$";
 
     public static PathAllocator createNewRouter(){
-        return new PathNode(null);
+        StaticPathNode staticNode = new StaticPathNode();
+        
+        String[] actionPathArr = StaticResourceResult.DEFAULT_STATIC_URI.split("/");
+        LinkedList<String> pathList = new LinkedList<>();
+        Collections.addAll(pathList,actionPathArr);
+        if(pathList.size()>0 && pathList.getFirst().equals("")) pathList.removeFirst();
+        if(pathList.size()<=0)
+            return staticNode;
+        String last = pathList.removeLast();
+
+        PathNode node = new PathNode(null);
+        PathNode staticMother = (PathNode) node.createTree(pathList.listIterator(),null);
+        staticMother.childNodes.put(last,staticNode);
+
+        return node;
     }
 
     protected interface PathAllocator extends ActionInvoker{
@@ -108,7 +122,7 @@ public class PathRouter {
             return ret;
         }
 
-        private ListIterator<String> splitURLPath(String path){
+        private static ListIterator<String> splitURLPath(String path){
             String[] actionPathArr = path.split("/");
             LinkedList<String> pathList = new LinkedList<>();
             Collections.addAll(pathList,actionPathArr);
@@ -158,7 +172,7 @@ public class PathRouter {
             return childNode.createTree(pathIter,whildcardNamespace);
         }
 
-        private Result invokeAction(ListIterator<String> path, List<String> param, Request req)
+        protected Result invokeAction(ListIterator<String> path, List<String> param, Request req)
                 throws InvocationTargetException, IllegalAccessException {
 
             if(!path.hasNext()){

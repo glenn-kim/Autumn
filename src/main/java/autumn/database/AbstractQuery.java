@@ -109,6 +109,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> List<DT> list(DBConnection conn) throws SQLException { //select
         String sql = genListSQL();
+        whereCondition = null;
         return select(conn, sql);
     }
 
@@ -118,6 +119,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> DT first(DBConnection conn) throws SQLException { //select one
         String sql = genFirstSQL();
+        whereCondition = null;
         List<DT> l = select(conn, sql);
         if(l.isEmpty())
             return null;
@@ -145,6 +147,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public int delete(DBConnection conn) throws SQLException { //delete
         String sql = genDeleteSQL();
+        whereCondition = null;
         return conn.executeUpdate(sql);
     }
 
@@ -157,6 +160,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
+        whereCondition = null;
         return conn.executeUpdate(sql);
     }
 
@@ -166,6 +170,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> List<Integer> insertReturningGenKey(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
+        whereCondition = null;
         return conn.executeUpdateReturningGenkey(sql);
     }
 

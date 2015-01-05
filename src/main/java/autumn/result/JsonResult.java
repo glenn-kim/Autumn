@@ -14,7 +14,6 @@ public class JsonResult extends Result<JsonResult> {
         @Override
         protected Gson initialValue() {
             GsonBuilder gb = new GsonBuilder();
-            gb.excludeFieldsWithoutExposeAnnotation();
             return gb.create();
         }
     };

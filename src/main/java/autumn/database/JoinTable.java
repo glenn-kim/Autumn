@@ -7,7 +7,7 @@ public abstract class JoinTable<Left extends AbstractTable,Right extends Abstrac
     public Left left;
     public Right right;
     protected Condition joinCondition;
-    protected String sqlStrFormat =  "%s INNER JOIN %s ON %s";
+    private static final String sqlStrFormat =  "%s INNER JOIN %s ON %s";
     private String sqlStr;
 
 
@@ -16,7 +16,11 @@ public abstract class JoinTable<Left extends AbstractTable,Right extends Abstrac
         this.right = right;
         this.mappingDataType(dataTypeClass);
         this.joinCondition = on(left,right);
-        sqlStr = String.format(sqlStrFormat,left.toSQL(),right.toSQL(),joinCondition.toSQL());
+        sqlStr = generateSqlStr();
+    }
+    
+    protected String generateSqlStr(){
+        return String.format(sqlStrFormat,left.toSQL(),right.toSQL(),joinCondition.toSQL());
     }
 
 

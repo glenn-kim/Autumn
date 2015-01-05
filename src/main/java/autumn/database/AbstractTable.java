@@ -24,7 +24,7 @@ public abstract class AbstractTable<DataType> {
 
         Class type = this.getClass();
 
-        Field[] allField = type.getFields();
+        Field[] allField = type.getDeclaredFields();
         columns= new LinkedList<>();
 
 

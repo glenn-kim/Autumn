@@ -17,7 +17,7 @@ public class ControllerReflector {
     private List<Class> controllerList = new ArrayList<>();
 
     public ControllerReflector(){
-        this("controllers");
+        this("");
     }
 
     public ControllerReflector(String anotherPackage){

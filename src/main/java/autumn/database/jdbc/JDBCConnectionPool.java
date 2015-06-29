@@ -1,5 +1,8 @@
 package autumn.database.jdbc;
 
+import autumn.Servlet;
+
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -24,7 +27,14 @@ public class JDBCConnectionPool implements ConnectionPool {
     private String url, user, password;
 
     public JDBCConnectionPool() {
-        Properties p = System.getProperties();
+
+        Properties p = new Properties();
+        p = new Properties();
+        try {
+            p.load(getClass().getClassLoader().getResourceAsStream("server.properties"));
+        } catch (IOException | NullPointerException e) {
+            e.printStackTrace();
+        }
         url = p.getProperty("db.url");
         user = p.getProperty("db.user");
         password = p.getProperty("db.password");

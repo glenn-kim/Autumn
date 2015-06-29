@@ -42,14 +42,16 @@ public abstract class Result<This extends Result>{
         Properties messages = new Properties();
         try {
             messages.load(Result.class.getResourceAsStream("/messages.properties"));
-        } catch (IOException e) {
+
+
+            StandardMessageResolver standardMessageResolver = new StandardMessageResolver();
+            standardMessageResolver.setDefaultMessages(messages);
+
+            templateEngineInstance.addMessageResolver(standardMessageResolver);
+
+        } catch (IOException | NullPointerException e) {
             e.printStackTrace();
         }
-
-        StandardMessageResolver standardMessageResolver = new StandardMessageResolver();
-        standardMessageResolver.setDefaultMessages(messages);
-
-        templateEngineInstance.addMessageResolver(standardMessageResolver);
     }
 
     private List<Header> headerInput = new ArrayList<>();

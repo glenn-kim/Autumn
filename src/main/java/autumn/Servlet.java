@@ -35,7 +35,7 @@ public class Servlet extends HttpServlet{
     @Override
     public void init() throws ServletException {
         super.init();
-        
+
         //System.out.println("init called");
         try{
             invoker = (new ControllerReflector()).generateActionInvoker();

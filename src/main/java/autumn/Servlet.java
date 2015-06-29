@@ -36,6 +36,7 @@ public class Servlet extends HttpServlet{
     public void init() throws ServletException {
         super.init();
 
+<<<<<<< Updated upstream
         //Must not to commit
         Properties p = System.getProperties();
         p.put("db.url", "***REMOVED***");
@@ -43,6 +44,8 @@ public class Servlet extends HttpServlet{
         p.put("db.password","***REMOVED***");
 
 
+=======
+>>>>>>> Stashed changes
         //System.out.println("init called");
         try{
             invoker = (new ControllerReflector()).generateActionInvoker();

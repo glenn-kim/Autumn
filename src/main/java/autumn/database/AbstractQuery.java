@@ -26,6 +26,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     protected List<Field> mappingFields = new LinkedList<>();
     private Condition whereCondition;
     private String selectSQLFormat;
+    private String selectLimitSQLFormat;
     private String selectFirstSQLFormat;
     private String updateSQLFormat;
 
@@ -101,6 +102,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
         String selectSQLPart = stringBuilder.toString();
         selectSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s");
+        selectLimitSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT %d OFFSET %d");
         selectFirstSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT 1");
 
     }
@@ -115,6 +117,12 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     protected String genListSQL() {
         return genSeletDeletSQL(selectSQLFormat);
+    }
+
+    public <DT> List<DT> list(DBConnection conn, int offset, int limit) throws SQLException { //select
+        String sql = genLimitSQL(offset, limit);
+        whereCondition = null;
+        return select(conn, sql);
     }
 
     public <DT> DT first(DBConnection conn) throws SQLException { //select one
@@ -156,6 +164,10 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     private String genSeletDeletSQL(String format) {
 
         return String.format(format, genWhereCondition());
+    }
+
+    private String genLimitSQL(int offset, int limit) {
+        return String.format(selectLimitSQLFormat, genWhereCondition(),limit , offset);
     }
 
     public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert

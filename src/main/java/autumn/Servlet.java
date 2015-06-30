@@ -73,7 +73,7 @@ public class Servlet extends HttpServlet{
         }
         catch (InvocationTargetException | IllegalAccessException e) {
             e.printStackTrace(System.err);
-            //TODO 500 error
+            res = Result.InternalServerError.plainText(e.toString());
             return;
         }
 

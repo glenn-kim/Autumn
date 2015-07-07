@@ -67,7 +67,7 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
                         sb.append("NULL");
                     else if(o.getClass().equals(String.class)){
                         sb.append('\'');
-                        sb.append(o.toString());
+                        sb.append(filterQuots(o.toString()));
                         sb.append('\'');
                     }
                     else if(o.getClass().equals(Timestamp.class)
@@ -130,7 +130,7 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
                  sb.append(" = ");
                  if (o.getClass().equals(String.class)) {
                      sb.append('\'');
-                     sb.append(o.toString());
+                     sb.append(filterQuots(o.toString()));
                      sb.append('\'');
                  } else if (o.getClass().equals(Timestamp.class)
                          | o.getClass().equals(Date.class)
@@ -147,12 +147,16 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
          }
 
 
-        return String.format(UPDATE_QUERY_FORMAT, table.toSQL(), sb.toString(),genWhereCondition());
+        return String.format(UPDATE_QUERY_FORMAT, table.toSQL(), sb.toString(), genWhereCondition());
     }
 
     @Override
     public TableQuery<T> where(Function<T, Condition> conditionFunc) {
         super.where(conditionFunc);
         return this;
+    }
+
+    private static String filterQuots(String str){
+        return str.replace("'","''");
     }
 }

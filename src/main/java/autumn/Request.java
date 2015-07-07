@@ -177,4 +177,8 @@ public class Request{
     public String getAcceptType() {
         return request.getHeader("Accept");
     }
+
+    public String getContentType() {
+        return contentType;
+    }
 }

@@ -1,16 +1,23 @@
 package autumn.database;
 
+import autumn.database.jdbc.DBConnection;
+
 import java.lang.reflect.Field;
 import java.sql.Date;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.function.Function;
 
 
 /**
  * Created by infinitu on 14. 12. 9..
  */
 public class TableQuery<T extends Table> extends AbstractQuery<T> {
+
+    private String updateSQLFormat;
+
     public TableQuery(Class<T> cls){
         super(cls);
     }
@@ -97,5 +104,55 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
     }
 
 
+    public int update(DBConnection conn, Object data) throws SQLException { //update
+        String sql = genUpdateSQL(data);
+        whereCondition = null;
+        return conn.executeUpdate(sql);
+    }
 
+    protected String genUpdateSQL(Object data){
+
+        StringBuilder sb = new StringBuilder();
+
+         String prefix_ = "";
+         for(int i=0;i<mappingFields.size();i++) {
+             Field f = mappingFields.get(i);
+             Column c = columnList.get(i);
+             try {
+                 Object o = f.get(data);
+                 if (o == null)
+                     continue;
+
+                 sb.append(prefix_);
+                 prefix_ = ", ";
+
+                 sb.append(c.getColumnName());
+                 sb.append(" = ");
+                 if (o.getClass().equals(String.class)) {
+                     sb.append('\'');
+                     sb.append(o.toString());
+                     sb.append('\'');
+                 } else if (o.getClass().equals(Timestamp.class)
+                         | o.getClass().equals(Date.class)
+                         | o.getClass().equals(java.util.Date.class)) {
+                     sb.append('\'');
+                     sb.append(dateFormatter.format(o));
+                     sb.append('\'');
+                 } else
+                     sb.append(o.toString());
+
+             } catch (IllegalAccessException e) {
+                 e.printStackTrace();
+             }
+         }
+
+
+        return String.format(UPDATE_QUERY_FORMAT, table.toSQL(), sb.toString(),genWhereCondition());
+    }
+
+    @Override
+    public TableQuery<T> where(Function<T, Condition> conditionFunc) {
+        super.where(conditionFunc);
+        return this;
+    }
 }

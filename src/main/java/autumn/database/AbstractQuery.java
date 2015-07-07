@@ -17,6 +17,7 @@ import java.util.function.Function;
 public abstract class AbstractQuery<T extends AbstractTable> {
     protected final static String INSERT_QUERY_FORMAT = "INSERT INTO %s VALUES %s;";
     protected final static String SELECT_QUERY_FORMAT = "SELECT %s FROM %s WHERE %s;";
+    protected final static String SELECT_DISTINCT_QUERY_FORMAT = "SELECT DISTINCT %s FROM %s WHERE %s;";
     protected final static String DELETE_QUERY_FORMAT = "DELETE %s FROM %s WHERE %s;";
     protected final static String UPDATE_QUERY_FORMAT = "UPDATE %s SET %s WHERE %s;";
     protected String insertSQLFormat;
@@ -24,11 +25,12 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     protected T table = null;
     protected List<Column> columnList = new LinkedList<>();
     protected List<Field> mappingFields = new LinkedList<>();
-    private Condition whereCondition;
+    protected Condition whereCondition;
     private String selectSQLFormat;
+    private String selectDistinctSQLFormat;
     private String selectLimitSQLFormat;
+    private String selectDistinctLimitSQLFormat;
     private String selectFirstSQLFormat;
-    private String updateSQLFormat;
 
     public AbstractQuery(Class<T> cls) {
         try {
@@ -102,7 +104,9 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
         String selectSQLPart = stringBuilder.toString();
         selectSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s");
+        selectDistinctSQLFormat = String.format(SELECT_DISTINCT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s");
         selectLimitSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT %d OFFSET %d");
+        selectDistinctLimitSQLFormat = String.format(SELECT_DISTINCT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT %d OFFSET %d");
         selectFirstSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT 1");
 
     }
@@ -121,6 +125,22 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     public <DT> List<DT> list(DBConnection conn, int offset, int limit) throws SQLException { //select
         String sql = genLimitSQL(offset, limit);
+        whereCondition = null;
+        return select(conn, sql);
+    }
+
+    public <DT> List<DT> listDistinct(DBConnection conn) throws SQLException { //select
+        String sql = genListDistinctSQL();
+        whereCondition = null;
+        return select(conn, sql);
+    }
+
+    protected String genListDistinctSQL() {
+        return genSeletDeletSQL(selectDistinctSQLFormat);
+    }
+
+    public <DT> List<DT> listDistinct(DBConnection conn, int offset, int limit) throws SQLException { //select
+        String sql = genDistinctLimitSQL(offset, limit);
         whereCondition = null;
         return select(conn, sql);
     }
@@ -170,6 +190,10 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         return String.format(selectLimitSQLFormat, genWhereCondition(),limit , offset);
     }
 
+    private String genDistinctLimitSQL(int offset, int limit) {  //todo refactor
+        return String.format(selectDistinctLimitSQLFormat, genWhereCondition(),limit , offset);
+    }
+
     public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert
         String sql = genInsertSQL(data);
         whereCondition = null;
@@ -196,15 +220,6 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     protected abstract String genInsertSQL(Object[] data);
 
 
-    /**
-     * @deprecated not implemented
-     */
-    @Deprecated()
-    public int update(){ //update
-        return 0;
-    }
-
-    protected String genUpdateSQL(){return "";}
 
     public AbstractQuery<T> where(Function<T,Condition> conditionFunc) {
         if(this.whereCondition == null)
@@ -223,5 +238,9 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         else
             condi = whereCondition.toSQL();
         return condi;
+    }
+
+    public void reset(){
+        whereCondition = null;
     }
 }

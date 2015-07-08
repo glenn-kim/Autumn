@@ -225,7 +225,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
         if(this.whereCondition == null)
             this.whereCondition=conditionFunc.apply(table);
         else
-            this.whereCondition.and(conditionFunc.apply(table));
+            this.whereCondition=this.whereCondition.and(conditionFunc.apply(table));
         return this;
     }
 

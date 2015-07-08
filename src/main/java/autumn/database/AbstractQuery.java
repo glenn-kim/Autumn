@@ -40,7 +40,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
             throw new RuntimeException(e);
         }
 
-        Field[] fields = cls.getDeclaredFields();
+        Field[] fields = cls.getFields();
 
         for (Field f : fields) {
             if((f.getModifiers()&Modifier.PUBLIC)==0)

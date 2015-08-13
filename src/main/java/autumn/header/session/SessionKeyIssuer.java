@@ -16,7 +16,7 @@ public class SessionKeyIssuer {
     }
 
     public String issue(){
-        return Base64.getEncoder().encodeToString(keygen.generateKey().getEncoded());
+            return Base64.getEncoder().encodeToString(keygen.generateKey().getEncoded());
     }
     
     public String issueHEX(){

@@ -70,6 +70,8 @@ public abstract class Result<This extends Result>{
     public static final StatusCodeHolder Forbidden                      = new StatusCodeHolder(403);
     public static final StatusCodeHolder NotFound                       = new StatusCodeHolder(404);
     public static final StatusCodeHolder InternalServerError            = new StatusCodeHolder(500);
+    public static final StatusCodeHolder AuthFailed                     = new StatusCodeHolder(405);
+    public static final StatusCodeHolder MovedPermonently               = new StatusCodeHolder(504);
 
     public static StatusCodeHolder Status(int code){
         return new StatusCodeHolder(code);

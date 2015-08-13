@@ -26,6 +26,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     protected List<Column> columnList = new LinkedList<>();
     protected List<Field> mappingFields = new LinkedList<>();
     protected Condition whereCondition;
+    protected String orderBy; //todo Generalize
     private String selectSQLFormat;
     private String selectDistinctSQLFormat;
     private String selectLimitSQLFormat;
@@ -103,11 +104,11 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
 
         String selectSQLPart = stringBuilder.toString();
-        selectSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s");
+        selectSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s%s");
         selectDistinctSQLFormat = String.format(SELECT_DISTINCT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s");
-        selectLimitSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT %d OFFSET %d");
+        selectLimitSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s%s LIMIT %d OFFSET %d");
         selectDistinctLimitSQLFormat = String.format(SELECT_DISTINCT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT %d OFFSET %d");
-        selectFirstSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s LIMIT 1");
+        selectFirstSQLFormat = String.format(SELECT_QUERY_FORMAT, selectSQLPart, table.toSQL(),"%s%s LIMIT 1");
 
     }
 
@@ -120,7 +121,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     protected String genListSQL() {
-        return genSeletDeletSQL(selectSQLFormat);
+        return genSeletSQL(selectSQLFormat);
     }
 
     public <DT> List<DT> list(DBConnection conn, int offset, int limit) throws SQLException { //select
@@ -136,7 +137,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     protected String genListDistinctSQL() {
-        return genSeletDeletSQL(selectDistinctSQLFormat);
+        return genSeletSQL(selectDistinctSQLFormat);
     }
 
     public <DT> List<DT> listDistinct(DBConnection conn, int offset, int limit) throws SQLException { //select
@@ -170,7 +171,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     protected String genFirstSQL() {
-        return genSeletDeletSQL(selectFirstSQLFormat);
+        return genSeletSQL(selectFirstSQLFormat);
     }
 
     public int delete(DBConnection conn) throws SQLException { //delete
@@ -181,17 +182,16 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     protected abstract String genDeleteSQL();
 
-    private String genSeletDeletSQL(String format) {
-
-        return String.format(format, genWhereCondition());
+    private String genSeletSQL(String format) {
+        return String.format(format, genWhereCondition(),orderBy==null?"":orderBy);
     }
 
     private String genLimitSQL(int offset, int limit) {
-        return String.format(selectLimitSQLFormat, genWhereCondition(),limit , offset);
+        return String.format(selectLimitSQLFormat, genWhereCondition(),orderBy==null?"":orderBy,limit , offset);
     }
 
     private String genDistinctLimitSQL(int offset, int limit) {  //todo refactor
-        return String.format(selectDistinctLimitSQLFormat, genWhereCondition(),limit , offset);
+        return String.format(selectDistinctLimitSQLFormat, genWhereCondition(), limit, offset);
     }
 
     public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert
@@ -201,7 +201,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     public <DT> int insert(DBConnection conn, DT data) throws SQLException {//insert
-        return insert(conn,new Object[]{data});
+        return insert(conn, new Object[]{data});
     }
 
     public <DT> List<Integer> insertReturningGenKey(DBConnection conn, DT[] data) throws SQLException {//insert
@@ -219,13 +219,32 @@ public abstract class AbstractQuery<T extends AbstractTable> {
 
     protected abstract String genInsertSQL(Object[] data);
 
-
-
     public AbstractQuery<T> where(Function<T,Condition> conditionFunc) {
         if(this.whereCondition == null)
             this.whereCondition=conditionFunc.apply(table);
         else
             this.whereCondition=this.whereCondition.and(conditionFunc.apply(table));
+        return this;
+    }
+
+    public AbstractQuery<T> orderByDesc(Function<T,Column> orderFunc) {
+        if(orderFunc==null) {
+            this.orderBy = null;
+            return this;
+        }
+        Column column = orderFunc.apply(table);
+        this.orderBy = String.format(" ORDER BY %S DESC",column.toSQL());
+        return this;
+    }
+
+
+    public AbstractQuery<T> orderByAsc(Function<T,Column> orderFunc) {
+        if(orderFunc==null) {
+            this.orderBy = null;
+            return this;
+        }
+        Column column = orderFunc.apply(table);
+        this.orderBy = String.format(" ORDER BY %S ASC",column.toSQL());
         return this;
     }
 

@@ -56,7 +56,7 @@ public class JDBCConnectionPool implements ConnectionPool {
         if (freeList.size() > 0 ) {
             conn = freeList.removeFirst();
             try {
-                if(conn.isClosed()) {
+                if(conn.isClosed()|!conn.isValid(1000)) {
                     numUsedConn--;
                     conn = getConnection();
                 }
@@ -76,8 +76,9 @@ public class JDBCConnectionPool implements ConnectionPool {
             addConnection();
             conn = getConnection();
         }
-        if (conn != null)
+        if (conn != null) {
             return conn;
+        }
         else {
             //can't get connections
             String msg = String.format(

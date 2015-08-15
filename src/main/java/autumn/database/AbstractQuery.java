@@ -233,7 +233,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
             return this;
         }
         Column column = orderFunc.apply(table);
-        this.orderBy = String.format(" ORDER BY %S DESC",column.toSQL());
+        this.orderBy = String.format(" ORDER BY %s DESC",column.toSQL());
         return this;
     }
 
@@ -244,7 +244,7 @@ public abstract class AbstractQuery<T extends AbstractTable> {
             return this;
         }
         Column column = orderFunc.apply(table);
-        this.orderBy = String.format(" ORDER BY %S ASC",column.toSQL());
+        this.orderBy = String.format(" ORDER BY %s ASC",column.toSQL());
         return this;
     }
 

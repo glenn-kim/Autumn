@@ -8,8 +8,12 @@ import java.sql.SQLException;
  * Created by infinitu on 14. 12. 17..
  */
 public class JoinQuery<T extends JoinTable> extends AbstractQuery<T>{
-    public JoinQuery(Class<T> cls) {
+    public JoinQuery(Class<T> cls) throws InstantiationException, IllegalAccessException {
         super(cls);
+    }
+
+    public JoinQuery(Class<T> cls, T tableInstance) {
+        super(cls, tableInstance);
     }
 
     @Override

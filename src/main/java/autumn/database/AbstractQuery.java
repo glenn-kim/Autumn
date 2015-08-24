@@ -33,21 +33,26 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     private String selectDistinctLimitSQLFormat;
     private String selectFirstSQLFormat;
 
-    public AbstractQuery(Class<T> cls) {
-        try {
-            table = cls.newInstance();
-        } catch (InstantiationException | IllegalAccessException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
 
+
+
+    public AbstractQuery(Class<T> cls) throws IllegalAccessException, InstantiationException {
+        this(cls, cls.newInstance());
+    }
+
+
+    public AbstractQuery(Class<T> cls, T tableInstance){
         Field[] fields = cls.getFields();
+        table = tableInstance;
 
         for (Field f : fields) {
             if((f.getModifiers()&Modifier.PUBLIC)==0)
                 continue;
             try {
-                Column col = (Column) f.get(table);
+                Object member = f.get(table);
+                if(!Column.class.isInstance(member))
+                    continue;
+                Column col = (Column)member;
                 Class colCls = col.getContentsType();
                 Field mapField = table.dataTypeClass.getField(f.getName());
                 if (!isAssignableFrom(mapField, colCls)) {

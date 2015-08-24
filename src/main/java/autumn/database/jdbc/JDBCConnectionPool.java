@@ -14,7 +14,7 @@ import java.util.Properties;
  */
 public class JDBCConnectionPool implements ConnectionPool {
 
-    private final int INITCON = 16;
+    private final int INITCON = 6;
 
     private static JDBCConnectionPool mPool = new JDBCConnectionPool();
     public static JDBCConnectionPool Instance() {return mPool;}
@@ -75,6 +75,7 @@ public class JDBCConnectionPool implements ConnectionPool {
                     numUsedConn, maxConnection);
             addConnection();
             conn = getConnection();
+            System.out.println(msg);
         }
         if (conn != null) {
             return conn;
@@ -84,6 +85,7 @@ public class JDBCConnectionPool implements ConnectionPool {
             String msg = String.format(
                     "can't get connections (free: %d current: %d max: %d)",
                     freeList.size(), numUsedConn, maxConnection);
+            System.out.println(msg);
             return null;
         }
     }
@@ -129,6 +131,7 @@ public class JDBCConnectionPool implements ConnectionPool {
             return false;
         }
         freeList.add(c);
+        System.out.println("add new Connection");
         return true;
     }
 

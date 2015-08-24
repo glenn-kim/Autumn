@@ -18,9 +18,14 @@ public class TableQuery<T extends Table> extends AbstractQuery<T> {
 
     private String updateSQLFormat;
 
-    public TableQuery(Class<T> cls){
+    public TableQuery(Class<T> cls) throws InstantiationException, IllegalAccessException {
         super(cls);
     }
+
+    public TableQuery(Class<T> cls, T tableInstance) {
+        super(cls, tableInstance);
+    }
+
     public static DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
 
     @Override

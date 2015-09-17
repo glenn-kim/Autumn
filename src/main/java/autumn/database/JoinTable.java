@@ -28,6 +28,6 @@ public abstract class JoinTable<Left extends AbstractTable,Right extends Abstrac
 
     @Override
     protected String toSQL() {
-        return this.generateSqlStr();
+        return this.sqlStr;
     }
 }

@@ -94,9 +94,13 @@ public class Condition {
         if(obj.getClass().equals(String.class)
                 | obj.getClass().equals(Timestamp.class)
                 | obj.getClass().equals(Date.class)){
-            return String.format("'%s'",obj.toString());
+            return String.format("'%s'",filterQuots(obj.toString()));
         }
         return obj.toString();
+    }
+
+    private static String filterQuots(String str){
+        return str.replace("'", "''");
     }
 
 }

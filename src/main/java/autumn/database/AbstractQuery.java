@@ -200,6 +200,8 @@ public abstract class AbstractQuery<T extends AbstractTable> {
     }
 
     public <DT> int insert(DBConnection conn, DT[] data) throws SQLException {//insert
+        if(data==null || data.length ==0)
+            return 0;
         String sql = genInsertSQL(data);
         whereCondition = null;
         return conn.executeUpdate(sql);
